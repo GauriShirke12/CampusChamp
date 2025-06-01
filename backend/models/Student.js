@@ -30,7 +30,7 @@ const studentSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// 🔒 Hash password before saving
+// Hash password before saving
 studentSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
@@ -43,7 +43,7 @@ studentSchema.pre("save", async function (next) {
   }
 });
 
-// ✅ Method to compare password for login
+//Method to compare password for login
 studentSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };

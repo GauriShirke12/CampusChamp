@@ -8,7 +8,7 @@ const generateToken = (id) => {
   });
 };
 
-// ✅ POST /api/register
+// POST /api/register
 const registerStudent = async (req, res) => {
   const { collegeId, name, collegeName, city, email, password } = req.body;
 
@@ -33,7 +33,7 @@ const registerStudent = async (req, res) => {
   }
 };
 
-// ✅ POST /api/login
+// POST /api/login
 const loginStudent = async (req, res) => {
   const { collegeId, password } = req.body;
 

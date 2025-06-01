@@ -3,21 +3,22 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
 
-dotenv.config();  // load env variables
+dotenv.config();  // Load env variables
 
-const app = express();  // initialize express app
+const app = express();  // Initialize express app
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Import routes AFTER app initialization
+// Routes
 const authRoutes = require("./routes/auth");
 const studentRoutes = require("./routes/student");
+const eventRoutes = require("./routes/event"); // ADD THIS
 
-// Register routes
 app.use("/api", authRoutes);
 app.use("/api/student", studentRoutes);
+app.use("/api/event", eventRoutes); // ADD THIS
 
 // Connect to MongoDB and start server
 mongoose.connect(process.env.MONGO_URI)

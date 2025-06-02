@@ -24,7 +24,7 @@ const updateStudentProfile = async (req, res) => {
   res.json(updated);
 };
 
-// GET /api/student/recommend
+// GET /api/student/match-teammates
 const getRecommendedTeammates = async (req, res) => {
   try {
     const currentStudent = req.user;
@@ -66,5 +66,5 @@ const getRecommendedTeammates = async (req, res) => {
 module.exports = {
   getStudentProfile,
   updateStudentProfile,
-  getRecommendedTeammates,
+  getRecommendedTeammates,  
 };

@@ -1,9 +1,11 @@
 const express = require("express");
-const router = express.Router();
+const { getStudentProfile, updateStudentProfile } = require("../controllers/studentController");
 const { protect } = require("../middleware/authMiddleware");
 
-router.get("/profile", protect, (req, res) => {
-  res.json(req.student);  // student info attached by middleware
-});
+const router = express.Router();
+
+// Protected routes
+router.get("/profile", protect, getStudentProfile);
+router.put("/profile", protect, updateStudentProfile);
 
 module.exports = router;

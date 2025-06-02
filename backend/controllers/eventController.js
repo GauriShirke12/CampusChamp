@@ -43,39 +43,74 @@ const rsvpEvent = async (req, res) => {
   }
 };
 
-// Get all events with RSVPs
+// Get all events 
 const getEvents = async (req, res) => {
   try {
     const { type } = req.query;
-
-    // If a type query param is provided, filter events by eventType
     const filter = type ? { eventType: type } : {};
 
     const events = await Event.find(filter).sort({ date: 1 });
-
     res.status(200).json(events);
   } catch (error) {
     res.status(500).json({ message: "Failed to get events", error: error.message });
   }
 };
 
-
-// Leaderboard based on RSVP count
+// Leaderboard based on RSVP count per student
 const getLeaderboard = async (req, res) => {
   try {
-    const events = await Event.find().populate("rsvps", "name collegeName");
-    const leaderboard = events.map((event) => ({
-      eventTitle: event.title,
-      totalRSVPs: event.rsvps.length,
+    const students = await Student.find({});
+    const events = await Event.find({});
+
+    // Map studentId => RSVP count
+    const rsvpCountMap = {};
+
+    events.forEach(event => {
+      event.rsvps.forEach(studentId => {
+        const idStr = studentId.toString();
+        rsvpCountMap[idStr] = (rsvpCountMap[idStr] || 0) + 1;
+      });
+    });
+
+    // Create leaderboard array
+    const leaderboard = students.map(student => {
+      const score = rsvpCountMap[student._id.toString()] || 0;
+      return {
+        _id: student._id,
+        name: student.name,
+        collegeName: student.collegeName,
+        score,
+      };
+    });
+
+    // Sort descending by score
+    leaderboard.sort((a, b) => b.score - a.score);
+
+    // Assign rank
+    let rank = 1;
+    let lastScore = null;
+    leaderboard.forEach((item, index) => {
+      if (lastScore === null || item.score < lastScore) {
+        rank = index + 1;
+      }
+      item.rank = rank;
+      lastScore = item.score;
+    });
+
+    // Return only requested fields
+    const response = leaderboard.map(({ rank, name, score, collegeName }) => ({
+      rank,
+      name,
+      score,
+      collegeName,
     }));
 
-    res.status(200).json(leaderboard);
+    res.status(200).json(response);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch leaderboard", error: error.message });
   }
 };
 
-// Export all handlers
 module.exports = {
   createEvent,
   rsvpEvent,

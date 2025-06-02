@@ -5,18 +5,17 @@ const eventSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  eventType: {
+    type: String,
+    enum: ["Hackathon", "Workshop", "Coding Challenge"],
+    required: true,
+  },
+  date: {
+    type: Date,
+    required: true,
+  },
   description: String,
-  date: Date,
-  // RSVP: array of students who joined
-  rsvps: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Student",
-  }],
-  // Optional: store scores or points per student
-  scores: [{
-    student: { type: mongoose.Schema.Types.ObjectId, ref: "Student" },
-    score: Number,
-  }],
+  rsvps: [{ type: mongoose.Schema.Types.ObjectId, ref: "Student" }],
 }, { timestamps: true });
 
 const Event = mongoose.model("Event", eventSchema);

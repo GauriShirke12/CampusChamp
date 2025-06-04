@@ -1,0 +1,16 @@
+.navbar {
+  z-index: 1000;
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.MuiAppBar-root {
+  background-color: #2B2E4A !important; /* deep navy */
+  color: white !important;
+}
+
+

@@ -7,6 +7,7 @@ const app = express();
 
 // Connect to database
 connectDB();
+app.use("/api/register", require("./routes/registration"));
 
 // Middleware
 app.use(cors());

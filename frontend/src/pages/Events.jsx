@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { EventAvailable } from '@mui/icons-material';
 import { motion } from 'framer-motion';
+import RegistrationModal from '../components/RegistrationModal';
 import {
   Container,
   Grid,
@@ -12,11 +13,6 @@ import {
   Tabs,
   Tab,
   useTheme,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
 } from '@mui/material';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
@@ -82,8 +78,7 @@ const eventsData = [
   },
 ];
 
-const getTimeLeft = (dateString) => {
-  const now = dayjs();
+const getTimeLeft = (dateString, now) => {
   const eventDate = dayjs(dateString);
   const diff = eventDate.diff(now);
   if (diff <= 0) return null;
@@ -91,16 +86,15 @@ const getTimeLeft = (dateString) => {
   return `${d.days()}d ${d.hours()}h ${d.minutes()}m`;
 };
 
+
 const Events = () => {
   const theme = useTheme();
+
   const [selectedCategory, setSelectedCategory] = useState('Coding Challenges');
   const [tab, setTab] = useState(0);
   const [now, setNow] = useState(dayjs());
-
-  // Modal state
-  const [openModal, setOpenModal] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [formData, setFormData] = useState({ name: '', email: '' });
 
   useEffect(() => {
     const timer = setInterval(() => setNow(dayjs()), 60000);
@@ -113,29 +107,16 @@ const Events = () => {
     setTab(0);
   };
 
-  const handleOpenModal = (event) => {
+  const handleRegisterClick = (event) => {
     setSelectedEvent(event);
-    setOpenModal(true);
+    setModalOpen(true);
   };
-
-  const handleCloseModal = () => {
-    setOpenModal(false);
-    setFormData({ name: '', email: '' });
-  };
-
-  const handleSubmit = () => {
-    console.log('Registration:', formData, 'for event:', selectedEvent);
-    alert(`Registered for ${selectedEvent?.title}!`);
-    handleCloseModal();
-  };
-
-  const tabLabels = ['Upcoming', 'Live', 'Past'];
 
   const filteredEvents =
     selectedCategory === 'Quizzes'
       ? eventsData.filter((e) => e.type === 'Quizzes')
       : eventsData.filter(
-          (e) => e.type === selectedCategory && e.status === tabLabels[tab]
+          (e) => e.type === selectedCategory && e.status === ['Upcoming', 'Live', 'Past'][tab]
         );
 
   return (
@@ -236,15 +217,15 @@ const Events = () => {
                       {event.description}
                     </Typography>
 
-                    {/* Countdown */}
                     {event.status === 'Upcoming' && (
-                      <Typography variant="body2" color="secondary" mb={1}>
-                        ⏳ {getTimeLeft(event.date) || 'Starting soon!'}
-                      </Typography>
-                    )}
+  <Typography variant="body2" color="secondary" mb={1}>
+    ⏳ {getTimeLeft(event.date, now) || 'Starting soon!'}
+  </Typography>
+)}
 
                     <Button
                       variant="contained"
+                      onClick={() => handleRegisterClick(event)}
                       sx={{
                         backgroundColor: '#1E2A38',
                         transition: '0.3s',
@@ -253,7 +234,6 @@ const Events = () => {
                           transform: 'scale(1.05)',
                         },
                       }}
-                      onClick={() => handleOpenModal(event)}
                     >
                       Register
                     </Button>
@@ -269,33 +249,12 @@ const Events = () => {
         )}
       </Grid>
 
-      {/* Registration Modal */}
-      <Dialog open={openModal} onClose={handleCloseModal}>
-        <DialogTitle>Register for {selectedEvent?.title}</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            margin="dense"
-            label="Name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          />
-          <TextField
-            fullWidth
-            margin="dense"
-            label="Email"
-            type="email"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseModal}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained">
-            Submit
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Registration Modal Component */}
+      <RegistrationModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        event={selectedEvent}
+      />
     </Container>
   );
 };

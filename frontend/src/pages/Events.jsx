@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { EventAvailable } from '@mui/icons-material';
+import { motion } from 'framer-motion';
 import {
   Container,
   Grid,
@@ -7,7 +9,6 @@ import {
   Typography,
   Button,
   Box,
-  Chip,
   Tabs,
   Tab,
 } from '@mui/material';
@@ -68,16 +69,19 @@ const eventsData = [
 
 const Events = () => {
   const [selectedCategory, setSelectedCategory] = useState('Coding Challenges');
-  const [tab, setTab] = useState(0); // 0 - Upcoming, 1 - Live, 2 - Past
+  const [tab, setTab] = useState(0);
 
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
   };
 
-  // Tab label mapping
+  const handleCategoryClick = (category) => {
+    setSelectedCategory(category);
+    setTab(0);
+  };
+
   const tabLabels = ['Upcoming', 'Live', 'Past'];
 
-  // Determine which events to show
   let filteredEvents = [];
 
   if (selectedCategory === 'Quizzes') {
@@ -90,34 +94,45 @@ const Events = () => {
   }
 
   return (
-    <Container sx={{ mt: 4 }}>
-      <Typography variant="h4" align="center" fontWeight="bold" gutterBottom>
-        Events
-      </Typography>
+    <Container>
+      {/* Animated Heading */}
+      <Box textAlign="center" mt={6} mb={4}>
+        <motion.div
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+        >
+          <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+            <EventAvailable sx={{ fontSize: 40, color: '#1976d2' }} />
+            <Typography variant="h4" fontWeight="bold">
+              Explore Events
+            </Typography>
+          </Box>
+        </motion.div>
+      </Box>
 
-      {/* Filter Chips */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap', mb: 3 }}>
+      {/* Category Filter */}
+      <Box display="flex" justifyContent="center" flexWrap="wrap" gap={2} mb={4}>
         {eventCategories.map((category) => (
-          <Chip
+          <Button
             key={category}
-            label={category}
-            onClick={() => {
-              setSelectedCategory(category);
-              setTab(0); // reset tab to Upcoming
-            }}
-            color={selectedCategory === category ? 'primary' : 'default'}
+            variant={selectedCategory === category ? 'contained' : 'outlined'}
+            color="primary"
             sx={{
-              fontSize: '1rem',
-              borderRadius: '999px',
-              padding: '12px 18px',
+              borderRadius: '20px',
+              textTransform: 'none',
               fontWeight: 500,
-              cursor: 'pointer',
+              px: 3,
+              py: 1,
             }}
-          />
+            onClick={() => handleCategoryClick(category)}
+          >
+            {category}
+          </Button>
         ))}
       </Box>
 
-      {/* Conditional Tabs */}
+      {/* Status Tabs */}
       {selectedCategory !== 'Quizzes' && (
         <Tabs
           value={tab}
@@ -138,29 +153,35 @@ const Events = () => {
         {filteredEvents.length > 0 ? (
           filteredEvents.map((event, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
-              <Card
-                sx={{
-                  backgroundColor: '#f9f9f9',
-                  boxShadow: 3,
-                  transition: '0.3s',
-                  '&:hover': { transform: 'scale(1.03)' },
-                }}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: 'easeOut', delay: index * 0.05 }}
               >
-                <CardContent>
-                  <Typography variant="h6" fontWeight={600} gutterBottom>
-                    {event.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    📅 {event.date}
-                  </Typography>
-                  <Typography variant="body1" mb={2}>
-                    {event.description}
-                  </Typography>
-                  <Button variant="contained" sx={{ backgroundColor: '#1E2A38' }}>
-                    Register
-                  </Button>
-                </CardContent>
-              </Card>
+                <Card
+                  sx={{
+                    backgroundColor: '#f9f9f9',
+                    boxShadow: 3,
+                    transition: '0.3s',
+                    '&:hover': { transform: 'scale(1.03)' },
+                  }}
+                >
+                  <CardContent>
+                    <Typography variant="h6" fontWeight={600} gutterBottom>
+                      {event.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      📅 {event.date}
+                    </Typography>
+                    <Typography variant="body1" mb={2}>
+                      {event.description}
+                    </Typography>
+                    <Button variant="contained" sx={{ backgroundColor: '#1E2A38' }}>
+                      Register
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
             </Grid>
           ))
         ) : (

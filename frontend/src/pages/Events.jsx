@@ -86,7 +86,6 @@ const getTimeLeft = (dateString, now) => {
   return `${d.days()}d ${d.hours()}h ${d.minutes()}m`;
 };
 
-
 const Events = () => {
   const theme = useTheme();
 
@@ -95,6 +94,12 @@ const Events = () => {
   const [now, setNow] = useState(dayjs());
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    collegeOrOrganization: '',
+  });
 
   useEffect(() => {
     const timer = setInterval(() => setNow(dayjs()), 60000);
@@ -112,6 +117,43 @@ const Events = () => {
     setModalOpen(true);
   };
 
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setFormData({
+      name: '',
+      email: '',
+      collegeOrOrganization: '',
+    });
+    setSelectedEvent(null);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          collegeOrOrganization: formData.collegeOrOrganization,
+          eventTitle: selectedEvent?.title,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(`Registered for ${selectedEvent?.title}!`);
+        handleCloseModal();
+      } else {
+        alert(data.msg || 'Registration failed.');
+      }
+    } catch (error) {
+      console.error('Error submitting registration:', error);
+      alert('Server error.');
+    }
+  };
+
   const filteredEvents =
     selectedCategory === 'Quizzes'
       ? eventsData.filter((e) => e.type === 'Quizzes')
@@ -121,7 +163,6 @@ const Events = () => {
 
   return (
     <Container>
-      {/* Heading */}
       <Box textAlign="center" mt={6} mb={4}>
         <motion.div
           initial={{ y: -20, opacity: 0 }}
@@ -137,7 +178,6 @@ const Events = () => {
         </motion.div>
       </Box>
 
-      {/* Category Buttons */}
       <Box display="flex" justifyContent="center" flexWrap="wrap" gap={2} mb={4}>
         {eventCategories.map(({ label, icon }) => (
           <Button
@@ -166,7 +206,6 @@ const Events = () => {
         ))}
       </Box>
 
-      {/* Tabs */}
       {selectedCategory !== 'Quizzes' && (
         <Tabs
           value={tab}
@@ -182,7 +221,6 @@ const Events = () => {
         </Tabs>
       )}
 
-      {/* Event Cards */}
       <Grid container spacing={4}>
         {filteredEvents.length > 0 ? (
           filteredEvents.map((event, index) => (
@@ -218,10 +256,10 @@ const Events = () => {
                     </Typography>
 
                     {event.status === 'Upcoming' && (
-  <Typography variant="body2" color="secondary" mb={1}>
-    ⏳ {getTimeLeft(event.date, now) || 'Starting soon!'}
-  </Typography>
-)}
+                      <Typography variant="body2" color="secondary" mb={1}>
+                        ⏳ {getTimeLeft(event.date, now) || 'Starting soon!'}
+                      </Typography>
+                    )}
 
                     <Button
                       variant="contained"
@@ -249,11 +287,13 @@ const Events = () => {
         )}
       </Grid>
 
-      {/* Registration Modal Component */}
       <RegistrationModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={handleCloseModal}
         event={selectedEvent}
+        formData={formData}
+        setFormData={setFormData}
+        onSubmit={handleSubmit}
       />
     </Container>
   );

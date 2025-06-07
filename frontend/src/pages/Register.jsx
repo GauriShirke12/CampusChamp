@@ -1,12 +1,14 @@
 import React from "react";
 import { Container, Typography } from "@mui/material";
+import RegistrationForm from "../components/RegistrationForm";
 
-const Login = () => {
+function RegisterPage() {
   return (
     <Container>
-      <Typography variant="h4">Login Page</Typography>
+      <Typography variant="h4" gutterBottom>Register Now</Typography>
+      <RegistrationForm />
     </Container>
   );
-};
+}
 
-export default Login;
+export default RegisterPage;

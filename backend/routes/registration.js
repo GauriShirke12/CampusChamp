@@ -1,24 +1,48 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const Registration = require("../models/Registration");
+const nodemailer = require('nodemailer');
 
-// @route   POST /api/register
-// @desc    Register for an event
-// @access  Public
-router.post("/", async (req, res) => {
-  const { name, email, eventTitle } = req.body;
+router.post('/', async (req, res) => {
+  const { name, email, eventTitle, collegeOrOrganization } = req.body;
 
-  if (!name || !email || !eventTitle) {
-    return res.status(400).json({ msg: "Please fill all fields." });
+  if (!name || !email || !eventTitle || !collegeOrOrganization) {
+    return res.status(400).json({ msg: 'All fields are required.' });
   }
 
   try {
-    const registration = new Registration({ name, email, eventTitle });
-    await registration.save();
-    res.status(201).json({ msg: "Registered successfully" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Server error" });
+    // (Optional) You can save the registration to a DB here.
+
+    // Configure email transporter
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,     // your email (from .env)
+        pass: process.env.EMAIL_PASS,     // your app-specific password
+      },
+    });
+
+    // Compose email
+    const mailOptions = {
+      from: `"CampusChamp" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: `Registration Confirmed: ${eventTitle}`,
+      html: `
+        <p>Hi <strong>${name}</strong>,</p>
+        <p>Thank you for registering for the event: <strong>${eventTitle}</strong>.</p>
+        <p><strong>College/Organization:</strong> ${collegeOrOrganization}</p>
+        <p>We're excited to have you participate!</p>
+        <br/>
+        <p>Regards,<br/>CampusChamp Team</p>
+      `,
+    };
+
+    // Send email
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ msg: 'Registration successful. Confirmation email sent.' });
+  } catch (error) {
+    console.error('Error during registration:', error);
+    res.status(500).json({ msg: 'Server error. Could not send email.' });
   }
 });
 

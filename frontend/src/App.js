@@ -9,7 +9,7 @@ import Leaderboard from "./pages/Leaderboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
-// ✅ Import new Team Builder pages
+//  Import new Team Builder pages
 import TeamBuilderForm from "./pages/TeamBuilderForm";
 import TeamMatchPage from "./pages/TeamMatchPage";
 
@@ -26,7 +26,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* ✅ New Routes for Team Builder */}
+        {/*  New Routes for Team Builder */}
         <Route path="/team-builder/:eventId" element={<TeamBuilderForm />} />
         <Route path="/team-builder/:eventId/match" element={<TeamMatchPage />} />
       </Routes>

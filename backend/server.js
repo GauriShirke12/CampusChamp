@@ -1,3 +1,4 @@
+// backend/server.js
 const express = require("express");
 const connectDB = require("./config/db");
 const cors = require("cors");
@@ -5,18 +6,18 @@ require("dotenv").config();
 
 const app = express();
 
-// Connect to database
+// Connect to DB
 connectDB();
 
-// Middleware - must come BEFORE routes
+// Middleware (must be before routes!)
 app.use(cors());
-app.use(express.json()); // ✅ move this up
+app.use(express.json()); // This is required to parse JSON body
 
 // Routes
 app.use("/api/register", require("./routes/registration"));
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/student", require("./routes/student"));
-app.use("/api/events", require("./routes/event")); // plural is good!
+app.use("/api/events", require("./routes/event"));
 
 app.get("/", (req, res) => res.send("CampusChamp API"));
 

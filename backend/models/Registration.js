@@ -9,6 +9,10 @@ const RegistrationSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  collegeOrOrganization: {
+    type: String,
+    required: true,
+  },
   eventTitle: {
     type: String,
     required: true,

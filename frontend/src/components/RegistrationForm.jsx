@@ -16,15 +16,15 @@ const RegistrationForm = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post("/api/register", formData); // ✅ send JSON
-      alert("Registration successful!");
-    } catch (err) {
-      console.error("Registration failed:", err);
-      alert("Error occurred during registration");
-    }
-  };
+  e.preventDefault();
+  try {
+    await axios.post("http://localhost:5000/api/register", formData);
+    alert("Registration successful!");
+  } catch (error) {
+    console.error("Error submitting form:", error);
+    alert("Failed to register");
+  }
+};
 
   return (
     <form onSubmit={handleSubmit}>

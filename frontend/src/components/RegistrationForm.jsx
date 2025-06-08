@@ -1,73 +1,46 @@
+
 import React, { useState } from "react";
+import axios from "axios";
 
 const RegistrationForm = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    college: "",
-    branch: "",
-    year: "",
+    collegeOrOrganization: "",
+    eventTitle: "",
   });
 
   const handleChange = (e) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [e.target.name]: e.target.value,
-    }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post("/api/register", formData); // ✅ send JSON
+      alert("Registration successful!");
+    } catch (err) {
+      console.error("Registration failed:", err);
+      alert("Error occurred during registration");
+    }
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>User Registration</h2>
-      <form action="https://formspree.io/f/mdoqqbrq" method="POST">
-        <input
-          type="text"
-          name="name"
-          placeholder="Full Name"
-          required
-          value={formData.name}
-          onChange={handleChange}
-        /><br />
-
-        <input
-          type="email"
-          name="email"
-          placeholder="Email Address"
-          required
-          value={formData.email}
-          onChange={handleChange}
-        /><br />
-
-        <input
-          type="text"
-          name="college"
-          placeholder="College Name"
-          required
-          value={formData.college}
-          onChange={handleChange}
-        /><br />
-
-        <input
-          type="text"
-          name="branch"
-          placeholder="Branch"
-          required
-          value={formData.branch}
-          onChange={handleChange}
-        /><br />
-
-        <input
-          type="text"
-          name="year"
-          placeholder="Year"
-          required
-          value={formData.year}
-          onChange={handleChange}
-        /><br />
-
-        <button type="submit">Register</button>
-      </form>
-    </div>
+    <form onSubmit={handleSubmit}>
+      <h2>Event Registration</h2>
+      <input name="name" placeholder="Name" value={formData.name} onChange={handleChange} required />
+      <input name="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
+      <input
+        name="collegeOrOrganization"
+        placeholder="College or Organization"
+        value={formData.collegeOrOrganization}
+        onChange={handleChange}
+        required
+      />
+      <input name="eventTitle" placeholder="Event Title" value={formData.eventTitle} onChange={handleChange} required />
+      <button type="submit">Register</button>
+    </form>
   );
 };
 

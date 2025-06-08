@@ -1,48 +1,42 @@
-const express = require('express');
+// backend/routes/registration.js
+const express = require("express");
 const router = express.Router();
-const nodemailer = require('nodemailer');
+const mongoose = require("mongoose");
 
-router.post('/', async (req, res) => {
-  const { name, email, eventTitle, collegeOrOrganization } = req.body;
+// Schema for registration
+const RegistrationSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  collegeOrOrganization: String,
+  eventTitle: String,
+});
 
-  if (!name || !email || !eventTitle || !collegeOrOrganization) {
-    return res.status(400).json({ msg: 'All fields are required.' });
-  }
+const Registration = mongoose.model("Registration", RegistrationSchema);
 
+// POST /api/register
+router.post("/", async (req, res) => {
   try {
-    // (Optional) You can save the registration to a DB here.
+    console.log("Received data:", req.body); // For debug
 
-    // Configure email transporter
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,     // your email (from .env)
-        pass: process.env.EMAIL_PASS,     // your app-specific password
-      },
+    const { name, email, collegeOrOrganization, eventTitle } = req.body;
+
+    if (!name || !email || !collegeOrOrganization || !eventTitle) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const newRegistration = new Registration({
+      name,
+      email,
+      collegeOrOrganization,
+      eventTitle,
     });
 
-    // Compose email
-    const mailOptions = {
-      from: `"CampusChamp" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: `Registration Confirmed: ${eventTitle}`,
-      html: `
-        <p>Hi <strong>${name}</strong>,</p>
-        <p>Thank you for registering for the event: <strong>${eventTitle}</strong>.</p>
-        <p><strong>College/Organization:</strong> ${collegeOrOrganization}</p>
-        <p>We're excited to have you participate!</p>
-        <br/>
-        <p>Regards,<br/>CampusChamp Team</p>
-      `,
-    };
+    await newRegistration.save();
 
-    // Send email
-    await transporter.sendMail(mailOptions);
-
-    res.status(200).json({ msg: 'Registration successful. Confirmation email sent.' });
+    res.status(201).json({ message: "Registration successful!" });
   } catch (error) {
-    console.error('Error during registration:', error);
-    res.status(500).json({ msg: 'Server error. Could not send email.' });
+    console.error("Registration error:", error.message);
+    res.status(500).json({ message: "Server error" });
   }
 });
 

@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import Leaderboard from "./pages/Leaderboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import InvitesPage from "./pages/InvitesPage";
 
 //  Import new Team Builder pages
 import TeamBuilderForm from "./pages/TeamBuilderForm";
@@ -29,6 +30,7 @@ function App() {
         {/*  New Routes for Team Builder */}
         <Route path="/team-builder/:eventId" element={<TeamBuilderForm />} />
         <Route path="/team-builder/:eventId/match" element={<TeamMatchPage />} />
+        <Route path="/invites" element={<InvitesPage />} />
       </Routes>
     </Router>
   );

@@ -66,5 +66,9 @@ router.put("/:id/respond", protect, async (req, res) => {
   }
 });
 
+router.get("/my-invites", protect, getMyInvites);
+router.put("/respond/:id", protect, respondToInvite);
+
+
 
 module.exports = router;

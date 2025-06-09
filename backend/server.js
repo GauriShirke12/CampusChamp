@@ -17,7 +17,8 @@ app.use("/api/register", require("./routes/registration"));
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/student", require("./routes/student"));
 app.use("/api/events", require("./routes/event"));
-app.use("/api/invite", require("./routes/invite"));
+app.use("/api/invite", require("./routes/invite"));  
+app.use("/api/invites", require("./routes/invite")); 
 app.use("/api/teams", require("./routes/team"));
 
 // Root route

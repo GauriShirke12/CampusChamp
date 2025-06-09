@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Button } from "@/components/ui/button"; // adjust if you're using different UI
 
 const InvitesPage = () => {
   const [invites, setInvites] = useState([]);
@@ -57,15 +56,18 @@ const InvitesPage = () => {
 
             {invite.status === "pending" && (
               <div className="mt-3 flex gap-3">
-                <Button onClick={() => respondToInvite(invite._id, "accepted")}>
+                <button
+                  onClick={() => respondToInvite(invite._id, "accepted")}
+                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                >
                   Accept
-                </Button>
-                <Button
-                  variant="outline"
+                </button>
+                <button
                   onClick={() => respondToInvite(invite._id, "rejected")}
+                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
                 >
                   Reject
-                </Button>
+                </button>
               </div>
             )}
           </div>

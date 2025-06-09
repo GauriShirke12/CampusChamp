@@ -1,8 +1,6 @@
-import { Link } from "react-router-dom";
-
-<Link to="/invites" className="text-blue-600 underline">View Team Invites</Link>
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 const Dashboard = () => {
   const [invites, setInvites] = useState([]);
@@ -68,10 +66,14 @@ const Dashboard = () => {
           </ul>
         </div>
       )}
+
+      <div className="mt-6">
+        <Link to="/invites" className="text-blue-600 underline">
+          View Team Invites
+        </Link>
+      </div>
     </div>
   );
 };
-
-
 
 export default Dashboard;

@@ -2,10 +2,29 @@ const Student = require("../models/Student");
 const Event = require("../models/Event"); // Required for event RSVPs
 
 // GET /api/student/profile
-const getStudentProfile = async (req, res) => {
-  if (!req.user) return res.status(401).json({ message: "Unauthorized" });
-  res.status(200).json(req.user);
+exports.getStudentProfile = async (req, res) => {
+  try {
+    const student = await Student.findById(req.user.id).select("-password");
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    res.json({
+      name: student.name,
+      email: student.email,
+      collegeName: student.collegeName,
+      city: student.city,
+      dsaScore: student.dsaScore,
+      dsaRank: student.dsaRank,
+      quizScore: student.quizScore,
+      workshops: student.workshops,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
 };
+
 
 // PUT /api/student/profile
 const updateStudentProfile = async (req, res) => {

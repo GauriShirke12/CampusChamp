@@ -1,4 +1,3 @@
-
 const express = require("express");
 const connectDB = require("./config/db");
 const cors = require("cors");
@@ -9,17 +8,17 @@ const app = express();
 // Connect to DB
 connectDB();
 
-// Middleware (must be before routes!)
+// Middleware
 app.use(cors());
-app.use(express.json()); // To parse JSON body
+app.use(express.json());
 
 // Routes
 app.use("/api/register", require("./routes/registration"));
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/student", require("./routes/student"));
 app.use("/api/events", require("./routes/event"));
-app.use("/api/invite", require("./routes/invite")); 
-app.use("/api/teams", require("./routes/team"));    
+app.use("/api/invite", require("./routes/invite"));
+app.use("/api/teams", require("./routes/team"));
 
 // Root route
 app.get("/", (req, res) => res.send("CampusChamp API"));

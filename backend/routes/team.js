@@ -1,9 +1,17 @@
+// backend/routes/team.js
 const express = require("express");
-const { protect } = require("../middleware/authMiddleware");
-const { getMyTeam } = require("../controllers/teamController");
-
 const router = express.Router();
+const { protect } = require("../middleware/authMiddleware");
+const {
+  createTeam,
+  joinTeam,
+  getTeamByEvent,
+  getMyTeam
+} = require("../controllers/teamController");
 
-router.get("/my-team", protect, getMyTeam);
+router.post("/create", protect, createTeam);
+router.post("/join", protect, joinTeam);
+router.get("/my/:eventId", protect, getMyTeam);
+router.get("/event/:eventId", protect, getTeamByEvent);
 
 module.exports = router;

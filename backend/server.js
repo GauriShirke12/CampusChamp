@@ -9,6 +9,8 @@ const app = express();
 // Connect to DB
 connectDB();
 
+app.use("/api/invite", require("./routes/invite"));
+
 // Middleware (must be before routes!)
 app.use(cors());
 app.use(express.json()); // This is required to parse JSON body

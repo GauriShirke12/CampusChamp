@@ -12,6 +12,6 @@ const router = express.Router();
 router.get("/profile", protect, getStudentProfile);
 router.put("/profile", protect, updateStudentProfile);
 router.get("/match-teammates", protect, getRecommendedTeammates);
-router.put("/:id", protect, updateSkillsAndRoles); 
+router.put("/:id", protect, updateSkillsAndRoles);
 
 module.exports = router;

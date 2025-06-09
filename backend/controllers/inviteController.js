@@ -1,7 +1,18 @@
 const Invite = require("../models/Invite");
 const Team = require("../models/Team");
-const Event = require("../models/Event");
-const Student = require("../models/Student");
+
+const getMyInvites = async (req, res) => {
+  try {
+    const invites = await Invite.find({ invitee: req.user._id })
+      .populate("inviter", "name collegeName skills rolePreferences")
+      .populate("hackathonId", "title date");
+
+    res.status(200).json(invites);
+  } catch (err) {
+    console.error("Fetch invites error:", err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 const respondToInvite = async (req, res) => {
   try {
@@ -22,22 +33,18 @@ const respondToInvite = async (req, res) => {
     if (status === "accepted") {
       const { inviter, hackathonId } = invite;
 
-      // Find all other accepted invites for same inviter + hackathon
       const acceptedInvites = await Invite.find({
         inviter,
         hackathonId,
         status: "accepted",
       });
 
-      // Include inviter + all accepted invitees
       const acceptedMemberIds = acceptedInvites.map((i) => i.invitee.toString());
 
-      // Add inviter to the list
       if (!acceptedMemberIds.includes(inviter.toString())) {
         acceptedMemberIds.push(inviter.toString());
       }
 
-      // If enough members (e.g., 3), create team
       if (acceptedMemberIds.length >= 3) {
         const existingTeam = await Team.findOne({
           hackathonId,
@@ -50,7 +57,6 @@ const respondToInvite = async (req, res) => {
             members: acceptedMemberIds,
           });
 
-          // Optionally clean up other invites for this hackathon
           await Invite.deleteMany({ hackathonId, inviter });
 
           return res.status(200).json({
@@ -66,4 +72,9 @@ const respondToInvite = async (req, res) => {
     console.error("Respond to invite error:", err);
     res.status(500).json({ message: "Server error" });
   }
+};
+
+module.exports = {
+  getMyInvites,
+  respondToInvite,
 };

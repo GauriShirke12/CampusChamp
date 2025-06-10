@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box, Alert } from '@mui/material';
 import axios from 'axios';
@@ -22,8 +21,11 @@ const Login = () => {
         password,
       });
 
-      login(res.data); // save user + token in context and localStorage
-      navigate('/dashboard'); // Redirect to dashboard
+      // Store user and token in context/localStorage
+      login(res.data);
+
+      // ✅ Redirect to home
+      navigate('/');
     } catch (err) {
       setErrorMsg(err.response?.data?.message || 'Login failed!');
     }
@@ -33,9 +35,7 @@ const Login = () => {
     <Container maxWidth="xs">
       <Box mt={10} textAlign="center">
         <Typography variant="h4" gutterBottom>Login</Typography>
-
         {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
-
         <form onSubmit={handleLogin}>
           <TextField
             label="Email"

@@ -3,25 +3,25 @@ import { createContext, useContext, useState, useEffect } from "react";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [student, setStudent] = useState(null);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("student");
-    if (savedUser) setStudent(JSON.parse(savedUser));
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) setUser(JSON.parse(savedUser));
   }, []);
 
   const login = (data) => {
-    setStudent(data);
-    localStorage.setItem("student", JSON.stringify(data));
+    setUser(data);
+    localStorage.setItem("user", JSON.stringify(data));
   };
 
   const logout = () => {
-    setStudent(null);
-    localStorage.removeItem("student");
+    setUser(null);
+    localStorage.removeItem("user");
   };
 
   return (
-    <AuthContext.Provider value={{ student, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

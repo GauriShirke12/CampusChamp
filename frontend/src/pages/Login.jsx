@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TextField, Button, Container, Typography, Box, Alert } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -9,7 +9,14 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { user, login } = useAuth(); // ⬅️ Also check for logged in user
+
+  useEffect(() => {
+    // If already logged in, redirect to homepage
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -21,11 +28,8 @@ const Login = () => {
         password,
       });
 
-      // Store user and token in context/localStorage
-      login(res.data);
-
-      // ✅ Redirect to home
-      navigate('/');
+      login(res.data); // Save user and token
+      navigate('/');   // Redirect to homepage or dashboard
     } catch (err) {
       setErrorMsg(err.response?.data?.message || 'Login failed!');
     }

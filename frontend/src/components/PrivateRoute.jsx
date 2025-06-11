@@ -6,7 +6,13 @@ const PrivateRoute = ({ children }) => {
   const { user } = useAuth();
   const location = useLocation();
 
-  return user ? children : <Navigate to="/login" replace state={{ from: location }} />;
+  // If user is authenticated, allow access
+  if (user) {
+    return children;
+  }
+
+  // If not authenticated, redirect to login with the original path saved
+  return <Navigate to="/login" replace state={{ from: location }} />;
 };
 
 export default PrivateRoute;

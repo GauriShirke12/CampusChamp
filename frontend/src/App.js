@@ -27,8 +27,6 @@ function App() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/team-builder/:eventId" element={<TeamBuilderForm />} />
-          <Route path="/team-builder/:eventId/match" element={<TeamMatchPage />} />
 
           {/* ✅ Protected Routes */}
           <Route
@@ -44,6 +42,22 @@ function App() {
             element={
               <PrivateRoute>
                 <InvitesPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/team-builder/:eventId"
+            element={
+              <PrivateRoute>
+                <TeamBuilderForm />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/team-builder/:eventId/match"
+            element={
+              <PrivateRoute>
+                <TeamMatchPage />
               </PrivateRoute>
             }
           />

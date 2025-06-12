@@ -5,7 +5,7 @@ const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
-//Register
+// Register Student
 exports.registerStudent = async (req, res) => {
   const { name, collegeId, collegeName, city, email, password } = req.body;
 
@@ -14,18 +14,35 @@ exports.registerStudent = async (req, res) => {
   }
 
   const existingStudent = await Student.findOne({ email });
-  if (existingStudent) return res.status(400).json({ message: "Email already exists" });
+  if (existingStudent) {
+    return res.status(400).json({ message: "Email already exists" });
+  }
 
-  const student = await Student.create({ name, collegeId, collegeName, city, email, password });
+  const student = await Student.create({
+    name,
+    collegeId,
+    collegeName,
+    city,
+    email,
+    password,
+    role: "student", // Default role
+  });
 
   res.status(201).json({
-    _id: student._id,
-    name: student.name,
+    user: {
+      _id: student._id,
+      name: student.name,
+      email: student.email,
+      collegeId: student.collegeId,
+      collegeName: student.collegeName,
+      city: student.city,
+      role: student.role,
+    },
     token: generateToken(student._id),
   });
 };
 
-//Login
+// Login Student
 exports.loginStudent = async (req, res) => {
   const { email, password } = req.body;
 
@@ -35,8 +52,15 @@ exports.loginStudent = async (req, res) => {
   }
 
   res.json({
-    _id: student._id,
-    name: student.name,
+    user: {
+      _id: student._id,
+      name: student.name,
+      email: student.email,
+      collegeId: student.collegeId,
+      collegeName: student.collegeName,
+      city: student.city,
+      role: student.role,
+    },
     token: generateToken(student._id),
   });
 };

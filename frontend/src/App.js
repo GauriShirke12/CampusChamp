@@ -30,6 +30,8 @@ function App() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          
+
 
           {/* Protected Routes */}
           <Route
@@ -72,7 +74,7 @@ function App() {
               </AdminRoute>
             }
           />
-
+          <Route path="/admin/events" element={<PrivateRoute><managementEvent /></PrivateRoute>} />
         </Routes>
       </Router>
     </AuthProvider>

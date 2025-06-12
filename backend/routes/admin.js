@@ -19,4 +19,19 @@ router.delete("/users/:id", adminOnly, async (req, res) => {
   res.json({ message: "User deleted successfully" });
 });
 
+
+const {
+  getAllEvents,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+  getEventRegistrations
+} = require("../controllers/adminEventController");
+
+router.get("/events", protect, adminOnly, getAllEvents);
+router.post("/events", protect, adminOnly, createEvent);
+router.put("/events/:id", protect, adminOnly, updateEvent);
+router.delete("/events/:id", protect, adminOnly, deleteEvent);
+router.get("/events/:id/registrations", protect, adminOnly, getEventRegistrations);
+
 module.exports = router;

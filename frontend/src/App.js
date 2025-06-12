@@ -16,7 +16,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 
 import AdminRoute from './components/AdminRoute';
-import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminDashboard from './pages/admin/DashboardInsights';
 
 function App() {
   return (
@@ -75,6 +75,7 @@ function App() {
             }
           />
           <Route path="/admin/events" element={<PrivateRoute><managementEvent /></PrivateRoute>} />
+          
         </Routes>
       </Router>
     </AuthProvider>

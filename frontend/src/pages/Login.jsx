@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, Container, Typography, Box, Alert } from '@mui/material';
+import {
+  TextField,
+  Button,
+  Container,
+  Typography,
+  Box,
+  Alert,
+} from '@mui/material';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const Login = () => {
@@ -9,13 +16,10 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
-  const { user, login } = useAuth(); // ⬅️ Also check for logged in user
+  const { user, login } = useAuth();
 
   useEffect(() => {
-    // If already logged in, redirect to homepage
-    if (user) {
-      navigate('/');
-    }
+    if (user) navigate('/');
   }, [user, navigate]);
 
   const handleLogin = async (e) => {
@@ -28,18 +32,26 @@ const Login = () => {
         password,
       });
 
-      login(res.data); // Save user and token
-      navigate('/');   // Redirect to homepage or dashboard
+      login(res.data);
+      navigate('/');
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Login failed!');
+      if (err.response?.status === 404) {
+        setErrorMsg('No account found. Please register first.');
+      } else {
+        setErrorMsg(err.response?.data?.message || 'Login failed!');
+      }
     }
   };
 
   return (
     <Container maxWidth="xs">
       <Box mt={10} textAlign="center">
-        <Typography variant="h4" gutterBottom>Login</Typography>
+        <Typography variant="h4" gutterBottom>
+          Login
+        </Typography>
+
         {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+
         <form onSubmit={handleLogin}>
           <TextField
             label="Email"
@@ -64,6 +76,10 @@ const Login = () => {
             Login
           </Button>
         </form>
+
+        <Typography variant="body2" sx={{ mt: 2 }}>
+          Don't have an account? <Link to="/register">Register here</Link>
+        </Typography>
       </Box>
     </Container>
   );

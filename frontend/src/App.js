@@ -75,6 +75,7 @@ function App() {
             }
           />
           <Route path="/admin/events" element={<PrivateRoute><managementEvent /></PrivateRoute>} />
+          
         </Routes>
       </Router>
     </AuthProvider>

@@ -34,4 +34,20 @@ router.put("/events/:id", protect, adminOnly, updateEvent);
 router.delete("/events/:id", protect, adminOnly, deleteEvent);
 router.get("/events/:id/registrations", protect, adminOnly, getEventRegistrations);
 
+
+const {
+  getLeaderboard,
+  updateStudentScores
+} = require("../controllers/adminLeaderboardController");
+
+router.get("/leaderboard", protect, adminOnly, getLeaderboard);
+router.put("/leaderboard/:id", protect, adminOnly, updateStudentScores);
+
+const {
+  getDashboardStats,
+} = require("../controllers/adminDashboardController");
+
+router.get("/dashboard-stats", protect, adminOnly, getDashboardStats);
+
+
 module.exports = router;

@@ -9,19 +9,25 @@ const studentSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
 
-  // 🔽 New Fields
+  // New role field
+  role: {
+    type: String,
+    enum: ["student", "admin"],
+    default: "student",
+  },
+
   dsaScore: { type: Number, default: 0 },
   dsaRank: { type: Number, default: 0 },
   quizScore: { type: Number, default: 0 },
-  workshops: [{ type: String }]
+  workshops: [{ type: String }],
 });
 
-// Password compare method
+// Compare password
 studentSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// Hash password before saving
+// Hash password before save
 studentSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(10);

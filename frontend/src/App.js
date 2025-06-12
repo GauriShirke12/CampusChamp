@@ -15,6 +15,9 @@ import TeamMatchPage from "./pages/TeamMatchPage";
 import PrivateRoute from "./components/PrivateRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 
+import AdminRoute from './components/AdminRoute';
+import AdminDashboard from './pages/admin/AdminDashboard';
+
 function App() {
   return (
     <AuthProvider>
@@ -28,7 +31,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* ✅ Protected Routes */}
+          {/* Protected Routes */}
           <Route
             path="/dashboard"
             element={
@@ -61,6 +64,15 @@ function App() {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            }
+          />
+
         </Routes>
       </Router>
     </AuthProvider>

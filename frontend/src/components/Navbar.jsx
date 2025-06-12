@@ -1,13 +1,13 @@
 import React from 'react';
 import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext'; // ✅ import auth
+import { useAuth } from '../contexts/AuthContext'; // import auth
 import './Navbar.css';
 
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth(); // ✅ useAuth context
+  const { user, logout } = useAuth(); // useAuth context
 
   const handleLogout = () => {
     logout();
@@ -100,8 +100,12 @@ const Navbar = () => {
               >
                 Register
               </Button>
+
             </>
           )}
+          {user?.role === 'admin' && (
+                <Button component={Link} to="/admin">Admin Panel</Button>
+              )}
         </Box>
       </Toolbar>
     </AppBar>

@@ -1,103 +1,71 @@
-import React, { useEffect, useState } from "react";
-import {
-  Container, Typography, Table, TableHead, TableRow, TableCell, TableBody,
-  IconButton, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button
-} from "@mui/material";
-import { Edit } from "@mui/icons-material";
-import axios from "axios";
-import { useAuth } from "../../contexts/AuthContext";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Table, TableHead, TableRow, TableCell, TableBody, IconButton, Typography, Container } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { useAuth } from '../../contexts/AuthContext';
 
-const LeaderboardControl = () => {
+const UserManagement = () => {
   const { user } = useAuth();
   const [students, setStudents] = useState([]);
-  const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState(null);
 
-  const fetchLeaderboard = async () => {
-    const res = await axios.get("/api/admin/leaderboard", {
-      headers: { Authorization: `Bearer ${user.token}` },
-    });
-    setStudents(res.data);
+  const fetchStudents = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/admin/students', {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+      setStudents(res.data);
+    } catch (err) {
+      console.error(err.response?.data?.message || "Failed to fetch students");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure?")) return;
+    try {
+      await axios.delete(`http://localhost:5000/api/admin/students/${id}`, {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+      setStudents(prev => prev.filter(student => student._id !== id));
+    } catch (err) {
+      alert(err.response?.data?.message || "Delete failed");
+    }
   };
 
   useEffect(() => {
-    fetchLeaderboard();
+    fetchStudents();
   }, []);
-
-  const handleEdit = (student) => {
-    setEditing(student);
-    setOpen(true);
-  };
-
-  const handleUpdate = async () => {
-    await axios.put(`/api/admin/leaderboard/${editing._id}`, {
-      dsaScore: editing.dsaScore,
-      quizScore: editing.quizScore,
-      dsaRank: editing.dsaRank
-    }, {
-      headers: { Authorization: `Bearer ${user.token}` },
-    });
-    setOpen(false);
-    fetchLeaderboard();
-  };
 
   return (
     <Container>
-      <Typography variant="h4" gutterBottom>Leaderboard Control</Typography>
+      <Typography variant="h5" gutterBottom>Student Accounts</Typography>
       <Table>
         <TableHead>
           <TableRow>
             <TableCell>Name</TableCell>
+            <TableCell>Email</TableCell>
             <TableCell>College</TableCell>
-            <TableCell>DSA Score</TableCell>
-            <TableCell>Quiz Score</TableCell>
-            <TableCell>DSA Rank</TableCell>
+            <TableCell>City</TableCell>
             <TableCell>Action</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {students.map((s) => (
-            <TableRow key={s._id}>
-              <TableCell>{s.name}</TableCell>
-              <TableCell>{s.collegeName}</TableCell>
-              <TableCell>{s.dsaScore}</TableCell>
-              <TableCell>{s.quizScore}</TableCell>
-              <TableCell>{s.dsaRank}</TableCell>
+          {students.map((student) => (
+            <TableRow key={student._id}>
+              <TableCell>{student.name}</TableCell>
+              <TableCell>{student.email}</TableCell>
+              <TableCell>{student.collegeName}</TableCell>
+              <TableCell>{student.city}</TableCell>
               <TableCell>
-                <IconButton onClick={() => handleEdit(s)}><Edit /></IconButton>
+                <IconButton onClick={() => handleDelete(student._id)} color="error">
+                  <DeleteIcon />
+                </IconButton>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-
-      {/* Modal */}
-      <Dialog open={open} onClose={() => setOpen(false)}>
-        <DialogTitle>Edit Student Scores</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="DSA Score" type="number" fullWidth margin="dense"
-            value={editing?.dsaScore || 0}
-            onChange={(e) => setEditing({ ...editing, dsaScore: e.target.value })}
-          />
-          <TextField
-            label="Quiz Score" type="number" fullWidth margin="dense"
-            value={editing?.quizScore || 0}
-            onChange={(e) => setEditing({ ...editing, quizScore: e.target.value })}
-          />
-          <TextField
-            label="DSA Rank" type="number" fullWidth margin="dense"
-            value={editing?.dsaRank || 0}
-            onChange={(e) => setEditing({ ...editing, dsaRank: e.target.value })}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleUpdate}>Update</Button>
-        </DialogActions>
-      </Dialog>
     </Container>
   );
 };
 
-export default LeaderboardControl;
+export default UserManagement;

@@ -32,3 +32,9 @@ exports.getEventRegistrations = async (req, res) => {
   const registrations = await Registration.find({ eventId: req.params.id }).populate("studentId", "-password");
   res.json(registrations);
 };
+
+// in adminEventController.js
+io.emit("notification", {
+  title: "Quiz ends soon!",
+  message: "5 minutes left to finish your quiz.",
+});

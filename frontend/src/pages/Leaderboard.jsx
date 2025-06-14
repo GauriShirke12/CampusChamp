@@ -1,5 +1,29 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
+import io from "socket.io-client";
+
+const socket = io("http://localhost:5000"); // replace with your backend URL
+
+function Leaderboard() {
+  const [leaderboard, setLeaderboard] = useState([]);
+
+  useEffect(() => {
+    socket.on("leaderboardUpdated", (data) => {
+      setLeaderboard(data);
+    });
+
+    return () => socket.off("leaderboardUpdated");
+  }, []);
+
+  return (
+    <div>
+      <h2>Live Leaderboard</h2>
+      {leaderboard.map((user, i) => (
+        <div key={i}>{i + 1}. {user.name} — {user.dsaScore}</div>
+      ))}
+    </div>
+  );
+}
+
 
 const Leaderboard = () => {
   const [leaders, setLeaders] = useState([]);

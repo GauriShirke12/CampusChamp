@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import AdminLayout from "./layouts/AdminLayout"; // we'll make this
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import AboutUs from "./pages/AboutUs";
@@ -17,6 +18,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 
 import AdminRoute from './components/AdminRoute';
 import AdminDashboard from './pages/admin/DashboardInsights';
+import RequireAdmin from "./auth/RequireAdmin"; // protects admin routes
 
 function App() {
   return (
@@ -81,5 +83,12 @@ function App() {
     </AuthProvider>
   );
 }
+useEffect(() => {
+  socket.on("notification", (notif) => {
+    toast(`${notif.title}: ${notif.message}`); // with react-hot-toast
+  });
+
+  return () => socket.off("notification");
+}, []);
 
 export default App;

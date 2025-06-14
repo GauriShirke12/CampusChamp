@@ -9,7 +9,7 @@ exports.updateStudentScores = async (req, res) => {
   await student.save();
 
   const updatedLeaderboard = await Student.find().sort({ dsaScore: -1 }).limit(10);
-  io.emit("leaderboardUpdated", updatedLeaderboard);  // 🔥 Send live update
+  io.emit("leaderboardUpdated", updatedLeaderboard);  //  Send live update
 
   res.json({ message: "Score updated" });
 };

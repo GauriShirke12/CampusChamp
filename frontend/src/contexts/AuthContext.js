@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext();
 
@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
         if (decoded.exp * 1000 > Date.now()) {
           return JSON.parse(localStorage.getItem("user"));
         } else {
-          localStorage.clear(); // expired
+          localStorage.clear(); // Token expired
         }
       } catch (err) {
         console.error("Invalid token", err);

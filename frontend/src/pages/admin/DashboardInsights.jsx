@@ -1,25 +1,50 @@
 import React, { useEffect, useState } from "react";
-import { Container, Typography, Card, CardContent, Grid, List, ListItem } from "@mui/material";
+import {
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  List,
+  ListItem,
+  CircularProgress,
+  Alert,
+} from "@mui/material";
 import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
 
 const DashboardInsights = () => {
   const { user } = useAuth();
-  const [stats, setStats] = useState({ totalUsers: 0, activeUsers: 0, eventStats: [] });
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchStats = async () => {
-      const res = await axios.get("/api/admin/dashboard-stats", {
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
-      setStats(res.data);
+      try {
+        const res = await axios.get("/api/admin/dashboard-stats", {
+          headers: { Authorization: `Bearer ${user?.token}` },
+        });
+        setStats(res.data);
+      } catch (err) {
+        setError("Failed to load dashboard stats.");
+      } finally {
+        setLoading(false);
+      }
     };
-    fetchStats();
+
+    if (user?.token) fetchStats();
   }, [user]);
+
+  if (loading) return <CircularProgress />;
+  if (error) return <Alert severity="error">{error}</Alert>;
+  if (!stats) return null;
 
   return (
     <Container>
-      <Typography variant="h4" gutterBottom>Dashboard Insights</Typography>
+      <Typography variant="h4" gutterBottom>
+        Dashboard Insights
+      </Typography>
 
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
@@ -43,11 +68,13 @@ const DashboardInsights = () => {
         <Grid item xs={12}>
           <Card>
             <CardContent>
-              <Typography variant="h6" gutterBottom>Event Registration Stats</Typography>
+              <Typography variant="h6" gutterBottom>
+                Event Registration Stats
+              </Typography>
               <List>
                 {stats.eventStats.map((event, index) => (
-                  <ListItem key={index}>
-                    {event.name}: {event.registrations} registrations
+                  <ListItem key={event._id || index} divider>
+                    <strong>{event.name}</strong>: {event.registrations} registrations
                   </ListItem>
                 ))}
               </List>

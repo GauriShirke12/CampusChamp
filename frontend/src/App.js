@@ -14,15 +14,14 @@ import TeamMatchPage from "./pages/TeamMatchPage";
 
 import PrivateRoute from "./components/PrivateRoute";
 import AdminRoute from './components/AdminRoute';
-import RequireAdmin from "./auth/RequireAdmin";
 
 import { AuthProvider } from "./contexts/AuthContext";
 import { toast } from "react-hot-toast";
-import socket from "./utils/socket"; // Make sure this file exists and exports your socket connection
+import socket from "./utils/socket"; 
 
 // Admin Pages
 import AdminDashboard from './pages/admin/DashboardInsights';
-import EventManagement from './pages/admin/EventManagement';
+import EventManagement from './pages/admin/ManageEvents';
 
 function App() {
   useEffect(() => {

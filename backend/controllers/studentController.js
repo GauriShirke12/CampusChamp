@@ -18,34 +18,40 @@ const getStudentProfile = async (req, res) => {
       workshops: student.workshops,
     });
   } catch (error) {
+    console.error("Get student profile error:", error.message);
     res.status(500).json({ message: "Server error" });
   }
 };
 
 // PUT /api/student/profile
 const updateStudentProfile = async (req, res) => {
-  const student = await Student.findById(req.user._id);
-  if (!student) return res.status(404).json({ message: "Student not found" });
+  try {
+    const student = await Student.findById(req.user._id);
+    if (!student) return res.status(404).json({ message: "Student not found" });
 
-  const { name, city, skills, rolePreferences } = req.body;
-  if (name) student.name = name;
-  if (city) student.city = city;
-  if (skills) student.skills = skills;
-  if (rolePreferences) student.rolePreferences = rolePreferences;
+    const { name, city, skills, rolePreferences } = req.body;
+    if (name) student.name = name;
+    if (city) student.city = city;
+    if (Array.isArray(skills)) student.skills = skills;
+    if (Array.isArray(rolePreferences)) student.rolePreferences = rolePreferences;
 
-  const updated = await student.save();
-  res.json(updated);
+    const updated = await student.save();
+    res.json(updated);
+  } catch (error) {
+    console.error("Update profile error:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
 // PUT /api/student/:id
 const updateSkillsAndRoles = async (req, res) => {
   try {
     const { skills, rolePreferences } = req.body;
-    const updated = await Student.findByIdAndUpdate(
-      req.params.id,
-      { skills, rolePreferences },
-      { new: true }
-    );
+    const updateFields = {};
+    if (Array.isArray(skills)) updateFields.skills = skills;
+    if (Array.isArray(rolePreferences)) updateFields.rolePreferences = rolePreferences;
+
+    const updated = await Student.findByIdAndUpdate(req.params.id, updateFields, { new: true });
     res.json({ message: "Student profile updated", student: updated });
   } catch (err) {
     console.error("Update student error:", err.message);
@@ -90,7 +96,7 @@ const getRecommendedTeammates = async (req, res) => {
     recommendations.sort((a, b) => b.score - a.score);
     res.status(200).json(recommendations.slice(0, 5));
   } catch (error) {
-    console.error("Matching error:", error.message);
+    console.error(`Matching error for student ${req.user._id} and event ${req.query.eventId}:`, error.message);
     res.status(500).json({ message: "Failed to get teammate recommendations", error: error.message });
   }
 };

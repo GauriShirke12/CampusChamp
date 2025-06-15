@@ -6,40 +6,44 @@ const { getMyInvites, respondToInvite } = require("../controllers/inviteControll
 
 // Send an invite
 router.post("/", protect, async (req, res) => {
-  const { inviteeId, hackathonId } = req.body;
-  const inviterId = req.user._id;
-
   try {
-    const existing = await Invite.findOne({
+    const { inviteeId, hackathonId } = req.body;
+    const inviterId = req.user._id;
+
+    if (!inviteeId || !hackathonId) {
+      return res.status(400).json({ message: "Invitee and Hackathon ID are required." });
+    }
+
+    const alreadyInvited = await Invite.findOne({
       inviter: inviterId,
       invitee: inviteeId,
       hackathonId,
       status: "pending",
     });
 
-    if (existing) {
-      return res.status(400).json({ message: "Invite already sent" });
+    if (alreadyInvited) {
+      return res.status(400).json({ message: "You have already sent an invite to this user for this hackathon." });
     }
 
-    const newInvite = new Invite({
+    const invite = new Invite({
       inviter: inviterId,
       invitee: inviteeId,
       hackathonId,
     });
 
-    await newInvite.save();
+    await invite.save();
 
-    res.status(201).json({ message: "Invite sent successfully", invite: newInvite });
+    res.status(201).json({ message: "Invite sent successfully.", invite });
   } catch (err) {
-    console.error("Invite error:", err.message);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error sending invite:", err);
+    res.status(500).json({ message: "Failed to send invite. Please try again." });
   }
 });
 
 // Get invites for the logged-in user
 router.get("/my-invites", protect, getMyInvites);
 
-// Respond to invite
+// Respond to invite (accept/reject)
 router.put("/respond/:id", protect, respondToInvite);
 
 module.exports = router;

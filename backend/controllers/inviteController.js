@@ -4,7 +4,7 @@ const Team = require("../models/Team");
 const getMyInvites = async (req, res) => {
   try {
     const invites = await Invite.find({ invitee: req.user._id })
-      .populate("inviter", "name collegeName skills rolePreferences")
+      .populate("inviter", "name collegeName skills rolePreferences avatarUrl")
       .populate("hackathonId", "title date");
 
     res.status(200).json(invites);
@@ -19,48 +19,57 @@ const respondToInvite = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
+    // Validate status
     if (!["accepted", "rejected"].includes(status)) {
-      return res.status(400).json({ message: "Invalid status: must be accepted or rejected" });
+      return res.status(400).json({ message: "Invalid status. Must be 'accepted' or 'rejected'." });
     }
 
     const invite = await Invite.findById(id);
-    if (!invite) return res.status(404).json({ message: "Invite not found" });
+    if (!invite) {
+      return res.status(404).json({ message: "Invite not found" });
+    }
 
+    // Ensure invitee is the logged-in user
     if (!invite.invitee.equals(req.user._id)) {
       return res.status(403).json({ message: "Not authorized to respond to this invite" });
     }
 
-    if (invite.status === "accepted" || invite.status === "rejected") {
-      return res.status(400).json({ message: "Invite already responded to" });
+    // Prevent duplicate responses
+    if (["accepted", "rejected"].includes(invite.status)) {
+      return res.status(400).json({ message: "Invite has already been responded to" });
     }
 
     invite.status = status;
     await invite.save();
 
     if (status === "accepted") {
+      //  Collect all accepted members including inviter
       const acceptedInvites = await Invite.find({
         inviter: invite.inviter,
         hackathonId: invite.hackathonId,
         status: "accepted",
       });
 
-      const acceptedIds = acceptedInvites.map(inv => inv.invitee.toString());
-      if (!acceptedIds.includes(invite.inviter.toString())) {
-        acceptedIds.push(invite.inviter.toString());
-      }
+      const acceptedIds = new Set(acceptedInvites.map(inv => inv.invitee.toString()));
+      acceptedIds.add(invite.inviter.toString()); // Include the inviter
 
-      if (acceptedIds.length >= 3) {
+      //  If enough members, form a team
+      if (acceptedIds.size >= 3) {
+        const memberArray = Array.from(acceptedIds);
+
+        //  Check for existing team with same members
         const existingTeam = await Team.findOne({
           hackathonId: invite.hackathonId,
-          members: { $all: acceptedIds },
+          members: { $all: memberArray, $size: memberArray.length },
         });
 
         if (!existingTeam) {
           const newTeam = await Team.create({
             hackathonId: invite.hackathonId,
-            members: acceptedIds,
+            members: memberArray,
           });
 
+          //  Clean up other invites for this team
           await Invite.deleteMany({
             inviter: invite.inviter,
             hackathonId: invite.hackathonId,

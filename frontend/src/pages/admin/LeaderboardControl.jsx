@@ -1,13 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Paper, TextField, Button, Typography
-} from '@mui/material';
+  TableHead, TableRow, Paper, TextField, Button,
+  Typography, CircularProgress, Alert
+} from "@mui/material";
 
 const LeaderboardControl = () => {
   const [students, setStudents] = useState([]);
   const [editingScores, setEditingScores] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [savingId, setSavingId] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchLeaderboard();
@@ -15,30 +19,46 @@ const LeaderboardControl = () => {
 
   const fetchLeaderboard = async () => {
     try {
-      const res = await axios.get('/api/admin/leaderboard');
+      setLoading(true);
+      const res = await axios.get("/api/admin/leaderboard");
       setStudents(res.data);
     } catch (err) {
-      console.error('Failed to fetch leaderboard:', err);
+      setError("Failed to fetch leaderboard.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleScoreChange = (id, value) => {
+    if (isNaN(value)) return;
     setEditingScores(prev => ({ ...prev, [id]: value }));
   };
 
   const updateScore = async (id) => {
+    const newScore = editingScores[id];
+    if (newScore === undefined) return;
+
     try {
-      await axios.put(`/api/admin/score/${id}`, { dsaScore: editingScores[id] });
-      fetchLeaderboard();
+      setSavingId(id);
+      await axios.put(`/api/admin/score/${id}`, { dsaScore: Number(newScore) });
+      await fetchLeaderboard();
     } catch (err) {
-      console.error('Failed to update score:', err);
+      setError(`Failed to update score for student ${id}.`);
+    } finally {
+      setSavingId(null);
     }
   };
 
+  if (loading) return <CircularProgress />;
+  if (error) return <Alert severity="error">{error}</Alert>;
+
   return (
     <Paper sx={{ p: 3 }}>
-      <Typography variant="h5" gutterBottom>Leaderboard Control</Typography>
-      <TableContainer component={Paper}>
+      <Typography variant="h5" gutterBottom>
+        Leaderboard Control
+      </Typography>
+
+      <TableContainer>
         <Table>
           <TableHead>
             <TableRow>
@@ -58,17 +78,22 @@ const LeaderboardControl = () => {
                     type="number"
                     variant="outlined"
                     size="small"
-                    value={editingScores[student._id] ?? student.dsaScore}
+                    value={
+                      editingScores[student._id] !== undefined
+                        ? editingScores[student._id]
+                        : student.dsaScore
+                    }
                     onChange={(e) => handleScoreChange(student._id, e.target.value)}
-                    sx={{ width: '100px' }}
+                    sx={{ width: "100px" }}
                   />
                 </TableCell>
                 <TableCell>
                   <Button
                     variant="contained"
                     onClick={() => updateScore(student._id)}
+                    disabled={savingId === student._id}
                   >
-                    Update
+                    {savingId === student._id ? "Updating..." : "Update"}
                   </Button>
                 </TableCell>
               </TableRow>

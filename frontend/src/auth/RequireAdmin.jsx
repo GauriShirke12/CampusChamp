@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "./contexts/authContext"; // Adjust path if necessary
+import { useAuth } from "../contexts/AuthContext"; 
 
 const RequireAdmin = ({ children }) => {
   const { user, isLoggedIn } = useAuth();

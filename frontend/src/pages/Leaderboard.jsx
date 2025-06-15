@@ -25,3 +25,17 @@ function Leaderboard() {
 
   return (
     <div style={{ padding: "2rem", maxWidth: "600px", margin: "auto" }}>
+      <h2>Leaderboard</h2>
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      <ol>
+        {leaderboard.map((user, index) => (
+          <li key={user._id || index}>
+            <strong>{user.name}</strong> – {user.points} points
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+export default Leaderboard;

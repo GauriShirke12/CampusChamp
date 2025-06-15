@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
 
-const socket = io("http://localhost:5000"); // Change to your backend domain if hosted
+const socket = io("http://localhost:5000");
 
 function Leaderboard() {
   const [leaderboard, setLeaderboard] = useState([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    // Initial fetch (optional)
     fetch("/api/admin/leaderboard")
-      .then(res => res.json())
-      .then(data => setLeaderboard(data));
+      .then((res) => res.json())
+      .then((data) => setLeaderboard(data))
+      .catch((err) => {
+        console.error(err);
+        setError("Failed to load leaderboard.");
+      });
 
-    // Listen for real-time updates
     socket.on("leaderboardUpdated", (data) => {
       setLeaderboard(data);
     });
@@ -21,17 +24,4 @@ function Leaderboard() {
   }, []);
 
   return (
-    <div>
-      <h2>🏆 Live Leaderboard</h2>
-      <ul>
-        {leaderboard.map((user, index) => (
-          <li key={user._id}>
-            {index + 1}. {user.name} – {user.dsaScore}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-export default Leaderboard;
+    <div style={{ padding: "2rem", maxWidth: "600px", margin: "auto" }}>

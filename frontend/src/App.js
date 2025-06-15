@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import AdminLayout from "./layouts/AdminLayout"; // we'll make this
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import AboutUs from "./pages/AboutUs";
@@ -14,28 +13,40 @@ import TeamBuilderForm from "./pages/TeamBuilderForm";
 import TeamMatchPage from "./pages/TeamMatchPage";
 
 import PrivateRoute from "./components/PrivateRoute";
-import { AuthProvider } from "./contexts/AuthContext";
-
 import AdminRoute from './components/AdminRoute';
+import RequireAdmin from "./auth/RequireAdmin";
+
+import { AuthProvider } from "./contexts/AuthContext";
+import { toast } from "react-hot-toast";
+import socket from "./utils/socket"; // Make sure this file exists and exports your socket connection
+
+// Admin Pages
 import AdminDashboard from './pages/admin/DashboardInsights';
-import RequireAdmin from "./auth/RequireAdmin"; // protects admin routes
+import EventManagement from './pages/admin/EventManagement';
 
 function App() {
+  useEffect(() => {
+    socket.on("notification", (notif) => {
+      toast(`${notif.title}: ${notif.message}`);
+    });
+
+    return () => socket.off("notification");
+  }, []);
+
   return (
     <AuthProvider>
       <Router>
         <Navbar />
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/aboutus" element={<AboutUs />} />
           <Route path="/events" element={<Events />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          
 
-
-          {/* Protected Routes */}
+          {/* Protected User Routes */}
           <Route
             path="/dashboard"
             element={
@@ -68,6 +79,8 @@ function App() {
               </PrivateRoute>
             }
           />
+
+          {/* Admin Routes */}
           <Route
             path="/admin"
             element={
@@ -76,19 +89,18 @@ function App() {
               </AdminRoute>
             }
           />
-          <Route path="/admin/events" element={<PrivateRoute><managementEvent /></PrivateRoute>} />
-          
+          <Route
+            path="/admin/events"
+            element={
+              <AdminRoute>
+                <EventManagement />
+              </AdminRoute>
+            }
+          />
         </Routes>
       </Router>
     </AuthProvider>
   );
 }
-useEffect(() => {
-  socket.on("notification", (notif) => {
-    toast(`${notif.title}: ${notif.message}`); // with react-hot-toast
-  });
-
-  return () => socket.off("notification");
-}, []);
 
 export default App;

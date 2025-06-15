@@ -1,44 +1,41 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import jwt_decode from "jwt-decode"; 
+import jwtDecode from "jwt-decode";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("user");
-    return savedUser ? JSON.parse(savedUser) : null;
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        if (decoded.exp * 1000 > Date.now()) {
+          return JSON.parse(localStorage.getItem("user"));
+        } else {
+          localStorage.clear(); // expired
+        }
+      } catch (err) {
+        console.error("Invalid token", err);
+        localStorage.clear();
+      }
+    }
+    return null;
   });
 
-  const [token, setToken] = useState(() => localStorage.getItem("token") || "");
+  const [token, setToken] = useState(() => localStorage.getItem("token") || null);
 
+  // Sync between tabs
   useEffect(() => {
-    // Listen for auth changes across tabs
     const syncAuth = () => {
-      const storedUser = localStorage.getItem("user");
-      const storedToken = localStorage.getItem("token");
-
-      setUser(storedUser ? JSON.parse(storedUser) : null);
-      setToken(storedToken || "");
+      const newUser = localStorage.getItem("user");
+      const newToken = localStorage.getItem("token");
+      setUser(newUser ? JSON.parse(newUser) : null);
+      setToken(newToken || null);
     };
 
     window.addEventListener("storage", syncAuth);
     return () => window.removeEventListener("storage", syncAuth);
   }, []);
-
-  useEffect(() => {
-    // Optional: auto-logout on token expiry
-    if (token) {
-      try {
-        const decoded = jwt_decode(token);
-        if (decoded.exp * 1000 < Date.now()) {
-          logout();
-        }
-      } catch (err) {
-        console.error("Invalid token:", err);
-        logout();
-      }
-    }
-  }, [token]);
 
   const login = ({ user, token }) => {
     setUser(user);
@@ -49,13 +46,15 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setUser(null);
-    setToken("");
+    setToken(null);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
   };
 
+  const isLoggedIn = !!token;
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout, isLoggedIn }}>
       {children}
     </AuthContext.Provider>
   );

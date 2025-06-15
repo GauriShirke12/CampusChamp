@@ -1,38 +1,41 @@
 const Student = require("../models/Student");
-const DsaSubmission = require("../models/DsaSubmission");
 
-const getDSALeaderboard = async (req, res) => {
+exports.getLeaderboard = async (req, res) => {
   try {
-    const scores = await DsaSubmission.aggregate([
-      {
-        $group: {
-          _id: "$student",
-          totalScore: { $sum: "$score" },
-        },
-      },
-      { $sort: { totalScore: -1 } },
-    ]);
+    const leaderboard = await Student.find()
+      .sort({ dsaScore: -1 })
+      .limit(10)
+      .select("name dsaScore");
 
-    const leaderboard = await Promise.all(
-      scores.map(async (entry, index) => {
-        const student = await Student.findById(entry._id);
-        if (!student) return null;
-
-        return {
-          rank: index + 1,
-          name: student.name,
-          collegeName: student.collegeName,
-          score: entry.totalScore,
-          profilePicture: student.avatarUrl || `https://i.pravatar.cc/100?u=${student._id}`,
-        };
-      })
-    );
-
-    res.json(leaderboard.filter(Boolean));
+    res.json(leaderboard);
   } catch (err) {
-    console.error("Leaderboard Error:", err.message);
-    res.status(500).json({ message: "Error fetching leaderboard" });
+    console.error("Fetching leaderboard failed:", err.message);
+    res.status(500).json({ message: "Failed to fetch leaderboard" });
   }
 };
 
-module.exports = { getDSALeaderboard };
+exports.updateStudentScores = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { dsaScore } = req.body;
+
+    const student = await Student.findById(id);
+    if (!student) return res.status(404).json({ message: "Student not found" });
+
+    student.dsaScore = dsaScore;
+    await student.save();
+
+    const io = req.app.get("io");
+    const updatedLeaderboard = await Student.find()
+      .sort({ dsaScore: -1 })
+      .limit(10)
+      .select("name dsaScore"); // <-- important
+
+    io.emit("leaderboardUpdated", updatedLeaderboard);
+
+    res.json({ message: "Student score updated successfully." });
+  } catch (err) {
+    console.error("Update student score failed:", err.message);
+    res.status(500).json({ message: "Failed to update score" });
+  }
+};

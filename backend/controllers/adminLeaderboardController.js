@@ -30,7 +30,8 @@ exports.updateStudentScores = async (req, res) => {
     const io = req.app.get("io");
     const updatedLeaderboard = await Student.find()
       .sort({ dsaScore: -1 })
-      .limit(10);
+      .limit(10)
+      .select("name dsaScore"); // Make sure to select only what the frontend expects
 
     io.emit("leaderboardUpdated", updatedLeaderboard);
 

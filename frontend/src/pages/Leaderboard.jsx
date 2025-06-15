@@ -8,14 +8,14 @@ function Leaderboard() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/leaderboard") 
+    fetch("/api/admin/leaderboard")
       .then((res) => res.json())
       .then((data) => {
-        console.log("Leaderboard fetched:", data); 
         if (Array.isArray(data)) {
           setLeaderboard(data);
         } else {
-          setError("Leaderboard data is invalid.");
+          console.warn("Expected array but got:", data);
+          setLeaderboard([]);
         }
       })
       .catch((err) => {
@@ -27,7 +27,7 @@ function Leaderboard() {
       if (Array.isArray(data)) {
         setLeaderboard(data);
       } else {
-        console.warn("Received non-array leaderboard update:", data);
+        console.warn("Received non-array leaderboard from socket:", data);
       }
     });
 
@@ -38,17 +38,17 @@ function Leaderboard() {
     <div style={{ padding: "2rem", maxWidth: "600px", margin: "auto" }}>
       <h2>Leaderboard</h2>
       {error && <p style={{ color: "red" }}>{error}</p>}
-      {Array.isArray(leaderboard) && leaderboard.length > 0 ? (
-        <ol>
-          {leaderboard.map((user, index) => (
+      <ol>
+        {leaderboard.length === 0 ? (
+          <p>No data available</p>
+        ) : (
+          leaderboard.map((user, index) => (
             <li key={user._id || index}>
-              <strong>{user.name}</strong> – {user.dsaScore ?? user.points} points
+              <strong>{user.name}</strong> – {user.dsaScore} points
             </li>
-          ))}
-        </ol>
-      ) : (
-        <p>No leaderboard data available.</p>
-      )}
+          ))
+        )}
+      </ol>
     </div>
   );
 }

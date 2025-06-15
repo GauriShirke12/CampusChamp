@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Student = require("../models/Student");
 
-// ✅ Correctly import named export `protect`
+// Correctly import named export `protect`
 const { protect } = require("../middlewares/authMiddleware");
 const adminOnly = require("../middlewares/adminMiddleware");
 

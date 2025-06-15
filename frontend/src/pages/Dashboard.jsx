@@ -1,3 +1,4 @@
+// 📄 Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
@@ -6,11 +7,12 @@ const Dashboard = () => {
   const [invites, setInvites] = useState([]);
   const [team, setTeam] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchInvites();
-    fetchTeam();
-    fetchProfile();
+    Promise.all([fetchInvites(), fetchTeam(), fetchProfile()]).finally(() =>
+      setLoading(false)
+    );
   }, []);
 
   const fetchInvites = async () => {
@@ -62,10 +64,10 @@ const Dashboard = () => {
     }
   };
 
+  if (loading) return <p className="text-white text-center mt-10">Loading...</p>;
+
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6 space-y-10 max-w-5xl mx-auto">
-
-      {/* 🧑 Profile Card */}
       {profile && (
         <div className="bg-gray-800 p-6 rounded-xl shadow-md flex items-center space-x-6">
           <div className="w-20 h-20 rounded-full bg-green-600 text-white text-2xl flex items-center justify-center font-bold">
@@ -79,7 +81,6 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* 📊 Performance */}
       {profile && (
         <div className="bg-gray-800 p-6 rounded-xl shadow-md">
           <h2 className="text-xl font-semibold mb-4 text-green-400">📈 Performance</h2>
@@ -92,7 +93,6 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* 🔔 Invites */}
       <div className="bg-gray-800 p-6 rounded-xl shadow-md">
         <h2 className="text-xl font-semibold mb-4 text-yellow-400">🔔 Pending Invites</h2>
         {invites.length === 0 ? (
@@ -106,34 +106,30 @@ const Dashboard = () => {
                 <button
                   className="bg-green-500 hover:bg-green-600 text-white px-4 py-1 mr-3 rounded"
                   onClick={() => respondToInvite(invite._id, "accepted")}
-                >
-                  Accept
-                </button>
+                >Accept</button>
                 <button
                   className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded"
                   onClick={() => respondToInvite(invite._id, "rejected")}
-                >
-                  Reject
-                </button>
+                >Reject</button>
               </div>
             </div>
           ))
         )}
       </div>
 
-      {/* 👥 Team */}
-      {team && (
-        <div className="bg-gray-800 p-6 rounded-xl shadow-md">
-          <h2 className="text-xl font-semibold mb-4 text-blue-400">👥 Your Hackathon Team</h2>
+      <div className="bg-gray-800 p-6 rounded-xl shadow-md">
+        <h2 className="text-xl font-semibold mb-4 text-blue-400">👥 Your Hackathon Team</h2>
+        {team?.members?.length > 0 ? (
           <ul className="list-disc pl-6 text-gray-300">
             {team.members.map((member) => (
               <li key={member._id}>{member.name}</li>
             ))}
           </ul>
-        </div>
-      )}
+        ) : (
+          <p className="text-gray-400">You're not part of any team yet.</p>
+        )}
+      </div>
 
-      {/* 🔗 Invites Link */}
       <div className="text-center">
         <Link to="/invites" className="text-blue-400 hover:underline text-lg">
           View All Team Invites →

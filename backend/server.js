@@ -3,13 +3,28 @@ const http = require("http");
 const socketIo = require("socket.io");
 const connectDB = require("./config/db");
 const cors = require("cors");
-const path = require("path");
 require("dotenv").config();
 
 const app = express();
 const server = http.createServer(app);
 
-// Socket.IO setup
+// -----------------------------
+//  Connect to MongoDB
+// -----------------------------
+connectDB();
+
+// -----------------------------
+//  CORS & JSON Middleware
+// -----------------------------
+app.use(cors({
+  origin: process.env.CLIENT_URL || "http://localhost:3000",
+  credentials: true,
+}));
+app.use(express.json());
+
+// -----------------------------
+//  Socket.IO Setup
+// -----------------------------
 const io = socketIo(server, {
   cors: {
     origin: process.env.CLIENT_URL || "http://localhost:3000",
@@ -17,52 +32,52 @@ const io = socketIo(server, {
     credentials: true,
   },
 });
-
-// Attach io to app for use in controllers
 app.set("io", io);
 
-// Connect to MongoDB
-connectDB();
+io.on("connection", (socket) => {
+  console.log(" Client connected:", socket.id);
 
-// Middleware
-app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:3000",
-  credentials: true,
-}));
-app.use(express.json());
+  socket.on("disconnect", () => {
+    console.log(" Client disconnected:", socket.id);
+  });
+});
 
-// API Routes
-app.use("/api/register", require("./routes/registration"));
+// -----------------------------
+//  API Routes
+// -----------------------------
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/register", require("./routes/registration"));
 app.use("/api/student", require("./routes/student"));
 app.use("/api/events", require("./routes/event"));
 app.use("/api/invite", require("./routes/invite"));
 app.use("/api/teams", require("./routes/team"));
 app.use("/api/admin", require("./routes/admin"));
+app.use("/api/leaderboard", require("./routes/leaderboard")); 
 
-// Default route
-app.get("/", (req, res) => res.send("CampusChamp API is running"));
+// -----------------------------
+// Health Check
+// -----------------------------
+app.get("/", (req, res) => {
+  res.send("CampusChamp API is running");
+});
 
-// 404 Handler
+// -----------------------------
+// 404 Not Found Handler
+// -----------------------------
 app.use((req, res) => {
   res.status(404).json({ message: "API route not found" });
 });
 
-// Centralized Error Handler (optional but recommended)
+// -----------------------------
+// Central Error Handler
+// -----------------------------
 app.use((err, req, res, next) => {
-  console.error("Unhandled error:", err.stack);
+  console.error("Internal Error:", err.stack);
   res.status(500).json({ message: "Something went wrong!" });
 });
 
-// Socket.IO connection event
-io.on("connection", (socket) => {
-  console.log("New client connected:", socket.id);
-
-  socket.on("disconnect", () => {
-    console.log("Client disconnected:", socket.id);
-  });
-});
-
-// Start the server
+// -----------------------------
+// Start Server
+// -----------------------------
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

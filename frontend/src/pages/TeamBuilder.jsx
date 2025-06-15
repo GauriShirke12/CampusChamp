@@ -1,4 +1,3 @@
-// frontend/pages/TeamBuilder.jsx
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -9,10 +8,9 @@ function TeamBuilder() {
   const [recommended, setRecommended] = useState([]);
   const [teamName, setTeamName] = useState("");
 
-  const token = localStorage.getItem("token"); // or useContext/AuthHook
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    // Fetch current team
     axios
       .get(`/api/teams/my/${eventId}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -42,6 +40,20 @@ function TeamBuilder() {
       setRecommended(res.data);
     } catch (err) {
       console.error("Recommendation error", err);
+    }
+  };
+
+  const sendInvite = async (receiverId) => {
+    try {
+      await axios.post(
+        "/api/invite",
+        { receiverId, hackathonId: eventId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Invite sent!");
+    } catch (err) {
+      console.error("Failed to send invite", err);
+      alert("Error sending invite");
     }
   };
 
@@ -89,10 +101,17 @@ function TeamBuilder() {
         <ul className="space-y-2">
           {recommended.map((stu) => (
             <li key={stu._id} className="border p-2 rounded shadow">
-              <div className="font-medium">{stu.name} ({stu.city})</div>
+              <div className="font-medium">
+                {stu.name} ({stu.city})
+              </div>
               <div>Skills: {stu.skills.join(", ")}</div>
               <div>Roles: {stu.rolePreferences.join(", ")}</div>
-              {/* 🔜 Invite button can go here */}
+              <button
+                className="mt-2 px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                onClick={() => sendInvite(stu._id)}
+              >
+                Invite
+              </button>
             </li>
           ))}
         </ul>

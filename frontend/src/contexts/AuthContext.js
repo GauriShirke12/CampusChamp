@@ -1,18 +1,36 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import jwtDecode from "jwt-decode";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("user");
-    return savedUser ? JSON.parse(savedUser) : null;
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        if (decoded.exp * 1000 > Date.now()) {
+          return JSON.parse(localStorage.getItem("user"));
+        } else {
+          localStorage.clear(); // expired
+        }
+      } catch (err) {
+        console.error("Invalid token", err);
+        localStorage.clear();
+      }
+    }
+    return null;
   });
 
+  const [token, setToken] = useState(() => localStorage.getItem("token") || null);
+
+  // Sync between tabs
   useEffect(() => {
-    // Listen for auth changes across tabs
     const syncAuth = () => {
-      const storedUser = localStorage.getItem("user");
-      setUser(storedUser ? JSON.parse(storedUser) : null);
+      const newUser = localStorage.getItem("user");
+      const newToken = localStorage.getItem("token");
+      setUser(newUser ? JSON.parse(newUser) : null);
+      setToken(newToken || null);
     };
 
     window.addEventListener("storage", syncAuth);
@@ -21,18 +39,22 @@ export const AuthProvider = ({ children }) => {
 
   const login = ({ user, token }) => {
     setUser(user);
+    setToken(token);
     localStorage.setItem("user", JSON.stringify(user));
     localStorage.setItem("token", token);
   };
 
   const logout = () => {
     setUser(null);
+    setToken(null);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
   };
 
+  const isLoggedIn = !!token;
+
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout, isLoggedIn }}>
       {children}
     </AuthContext.Provider>
   );

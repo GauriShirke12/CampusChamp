@@ -18,17 +18,17 @@ router.get("/", async (req, res) => {
     const fullData = await Promise.all(
       scores.map(async (s, idx) => {
         const student = await Student.findById(s._id);
-        return {
+        return student ? {
           rank: idx + 1,
           name: student.name,
           collegeName: student.collegeName,
           score: s.totalScore,
           profilePicture: student.avatarUrl || `https://i.pravatar.cc/100?u=${student._id}`,
-        };
+        } : null;
       })
     );
 
-    res.json(fullData);
+    res.json(fullData.filter(Boolean));
   } catch (err) {
     console.error("Leaderboard Error:", err);
     res.status(500).json({ message: "Error fetching leaderboard" });

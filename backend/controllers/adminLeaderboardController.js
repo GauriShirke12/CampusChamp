@@ -1,5 +1,19 @@
 const Student = require("../models/Student");
 
+exports.getLeaderboard = async (req, res) => {
+  try {
+    const leaderboard = await Student.find()
+      .sort({ dsaScore: -1 })
+      .limit(10)
+      .select("name dsaScore");
+
+    res.json(leaderboard);
+  } catch (err) {
+    console.error("Fetching leaderboard failed:", err.message);
+    res.status(500).json({ message: "Failed to fetch leaderboard" });
+  }
+};
+
 exports.updateStudentScores = async (req, res) => {
   try {
     const { id } = req.params;

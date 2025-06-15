@@ -3,8 +3,8 @@ const router = express.Router();
 const Student = require("../models/Student");
 
 // Correctly import named export `protect`
-const { protect } = require("../middlewares/authMiddleware");
-const adminOnly = require("../middlewares/adminMiddleware");
+const { protect } = require("../middleware/authMiddleware");
+const adminOnly = require("../middleware/adminMiddleware");
 
 /* ----------------------- USER MANAGEMENT ----------------------- */
 router.get("/users", adminOnly, async (req, res) => {

@@ -1,11 +1,15 @@
 const Event = require("../models/Event");
 const Student = require("../models/Student");
 
-// Create a new event
+// POST /api/events
 const createEvent = async (req, res) => {
-  const { title, eventType, date, description } = req.body;
-
   try {
+    const { title, eventType, date, description } = req.body;
+
+    if (!title || !eventType || !date) {
+      return res.status(400).json({ message: "Title, type, and date are required" });
+    }
+
     const event = await Event.create({
       title,
       eventType,
@@ -16,65 +20,63 @@ const createEvent = async (req, res) => {
 
     res.status(201).json(event);
   } catch (error) {
-    res.status(500).json({ message: "Event creation failed", error: error.message });
+    console.error("Error creating event:", error.message);
+    res.status(500).json({ message: "Failed to create event" });
   }
 };
 
-// RSVP to an event
+// PUT /api/events/:eventId/rsvp
 const rsvpEvent = async (req, res) => {
-  const { eventId } = req.params;
-
   try {
+    const { eventId } = req.params;
+    const userId = req.user._id;
+
     const event = await Event.findById(eventId);
     if (!event) return res.status(404).json({ message: "Event not found" });
 
-    const studentId = req.user._id;
-
-    if (event.rsvps.includes(studentId)) {
+    if (event.rsvps.includes(userId)) {
       return res.status(400).json({ message: "Already RSVPed" });
     }
 
-    event.rsvps.push(studentId);
+    event.rsvps.push(userId);
     await event.save();
 
     res.status(200).json({ message: "RSVP successful" });
   } catch (error) {
-    res.status(500).json({ message: "RSVP failed", error: error.message });
+    console.error("Error RSVPing:", error.message);
+    res.status(500).json({ message: "Failed to RSVP" });
   }
 };
 
-// Get all events 
+// GET /api/events
 const getEvents = async (req, res) => {
   try {
-    const { type } = req.query;
-    const filter = type ? { eventType: type } : {};
-
+    const filter = req.query.type ? { eventType: req.query.type } : {};
     const events = await Event.find(filter).sort({ date: 1 });
+
     res.status(200).json(events);
   } catch (error) {
-    res.status(500).json({ message: "Failed to get events", error: error.message });
+    console.error("Error getting events:", error.message);
+    res.status(500).json({ message: "Failed to retrieve events" });
   }
 };
 
-// Leaderboard based on RSVP count per student
+// GET /api/events/leaderboard
 const getLeaderboard = async (req, res) => {
   try {
     const students = await Student.find({});
     const events = await Event.find({});
 
-    // Map studentId => RSVP count
-    const rsvpCountMap = {};
-
-    events.forEach(event => {
-      event.rsvps.forEach(studentId => {
+    const rsvpCount = {};
+    for (const event of events) {
+      for (const studentId of event.rsvps) {
         const idStr = studentId.toString();
-        rsvpCountMap[idStr] = (rsvpCountMap[idStr] || 0) + 1;
-      });
-    });
+        rsvpCount[idStr] = (rsvpCount[idStr] || 0) + 1;
+      }
+    }
 
-    // Create leaderboard array
     const leaderboard = students.map(student => {
-      const score = rsvpCountMap[student._id.toString()] || 0;
+      const score = rsvpCount[student._id.toString()] || 0;
       return {
         _id: student._id,
         name: student.name,
@@ -83,21 +85,18 @@ const getLeaderboard = async (req, res) => {
       };
     });
 
-    // Sort descending by score
     leaderboard.sort((a, b) => b.score - a.score);
 
-    // Assign rank
     let rank = 1;
-    let lastScore = null;
+    let prevScore = null;
     leaderboard.forEach((item, index) => {
-      if (lastScore === null || item.score < lastScore) {
+      if (prevScore === null || item.score < prevScore) {
         rank = index + 1;
       }
       item.rank = rank;
-      lastScore = item.score;
+      prevScore = item.score;
     });
 
-    // Return only requested fields
     const response = leaderboard.map(({ rank, name, score, collegeName }) => ({
       rank,
       name,
@@ -107,7 +106,8 @@ const getLeaderboard = async (req, res) => {
 
     res.status(200).json(response);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch leaderboard", error: error.message });
+    console.error("Error generating leaderboard:", error.message);
+    res.status(500).json({ message: "Failed to get leaderboard" });
   }
 };
 

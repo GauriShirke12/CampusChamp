@@ -19,7 +19,7 @@ const respondToInvite = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    // ✅ Validate status
+    // Validate status
     if (!["accepted", "rejected"].includes(status)) {
       return res.status(400).json({ message: "Invalid status. Must be 'accepted' or 'rejected'." });
     }
@@ -29,12 +29,12 @@ const respondToInvite = async (req, res) => {
       return res.status(404).json({ message: "Invite not found" });
     }
 
-    // ✅ Ensure invitee is the logged-in user
+    // Ensure invitee is the logged-in user
     if (!invite.invitee.equals(req.user._id)) {
       return res.status(403).json({ message: "Not authorized to respond to this invite" });
     }
 
-    // ✅ Prevent duplicate responses
+    // Prevent duplicate responses
     if (["accepted", "rejected"].includes(invite.status)) {
       return res.status(400).json({ message: "Invite has already been responded to" });
     }
@@ -43,7 +43,7 @@ const respondToInvite = async (req, res) => {
     await invite.save();
 
     if (status === "accepted") {
-      // ✅ Collect all accepted members including inviter
+      //  Collect all accepted members including inviter
       const acceptedInvites = await Invite.find({
         inviter: invite.inviter,
         hackathonId: invite.hackathonId,
@@ -53,11 +53,11 @@ const respondToInvite = async (req, res) => {
       const acceptedIds = new Set(acceptedInvites.map(inv => inv.invitee.toString()));
       acceptedIds.add(invite.inviter.toString()); // Include the inviter
 
-      // ✅ If enough members, form a team
+      //  If enough members, form a team
       if (acceptedIds.size >= 3) {
         const memberArray = Array.from(acceptedIds);
 
-        // ✅ Check for existing team with same members
+        //  Check for existing team with same members
         const existingTeam = await Team.findOne({
           hackathonId: invite.hackathonId,
           members: { $all: memberArray, $size: memberArray.length },
@@ -69,7 +69,7 @@ const respondToInvite = async (req, res) => {
             members: memberArray,
           });
 
-          // ✅ Clean up other invites for this team
+          //  Clean up other invites for this team
           await Invite.deleteMany({
             inviter: invite.inviter,
             hackathonId: invite.hackathonId,

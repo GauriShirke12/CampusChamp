@@ -1,18 +1,16 @@
 const express = require("express");
-const Student = require("../models/Student");
-const adminOnly = require("../middlewares/adminMiddleware");
-const protect = require("../middlewares/authMiddleware");
-
 const router = express.Router();
+const Student = require("../models/Student");
+
+const protect = require("../middlewares/authMiddleware");
+const adminOnly = require("../middlewares/adminMiddleware");
 
 /* ----------------------- USER MANAGEMENT ----------------------- */
-// GET all users
 router.get("/users", adminOnly, async (req, res) => {
   const users = await Student.find().select("-password");
   res.json(users);
 });
 
-// DELETE user by ID
 router.delete("/users/:id", adminOnly, async (req, res) => {
   const user = await Student.findById(req.params.id);
   if (!user) return res.status(404).json({ message: "User not found" });
@@ -27,7 +25,7 @@ const {
   createEvent,
   updateEvent,
   deleteEvent,
-  getEventRegistrations
+  getEventRegistrations,
 } = require("../controllers/adminEventController");
 
 router.get("/events", protect, adminOnly, getAllEvents);
@@ -39,7 +37,7 @@ router.get("/events/:id/registrations", protect, adminOnly, getEventRegistration
 /* ------------------ LEADERBOARD CONTROL ------------------ */
 const {
   getLeaderboard,
-  updateStudentScores
+  updateStudentScores,
 } = require("../controllers/adminLeaderboardController");
 
 router.get("/leaderboard", protect, adminOnly, getLeaderboard);
@@ -55,7 +53,7 @@ router.get("/dashboard-stats", protect, adminOnly, getDashboardStats);
 /* ------------------ CONTENT MODERATION ------------------ */
 const {
   getAllWorkshops,
-  updateWorkshopApproval
+  updateWorkshopApproval,
 } = require("../controllers/adminContentController");
 
 router.get("/workshops", protect, adminOnly, getAllWorkshops);

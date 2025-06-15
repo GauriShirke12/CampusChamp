@@ -9,45 +9,52 @@ require("dotenv").config();
 const app = express();
 const server = http.createServer(app);
 
+// Socket.IO setup
 const io = socketIo(server, {
   cors: {
-    origin: "*", // You can limit this to frontend URL in production
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
-// Attach Socket.IO instance to app so it can be accessed elsewhere
+// Attach io to app for use in controllers
 app.set("io", io);
 
 // Connect to MongoDB
 connectDB();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.CLIENT_URL || "http://localhost:3000",
+  credentials: true,
+}));
 app.use(express.json());
 
-// Routes
-try {
-  app.use("/api/register", require("./routes/registration"));
-  app.use("/api/auth", require("./routes/auth"));
-  app.use("/api/student", require("./routes/student"));
-  app.use("/api/events", require("./routes/event"));
-  app.use("/api/invite", require("./routes/invite"));
-  app.use("/api/teams", require("./routes/team"));
-  app.use("/api/admin", require("./routes/admin")); // Make sure `adminMiddleware.js` exists
-} catch (err) {
-  console.error("Error loading routes:", err.message);
-}
+// API Routes
+app.use("/api/register", require("./routes/registration"));
+app.use("/api/auth", require("./routes/auth"));
+app.use("/api/student", require("./routes/student"));
+app.use("/api/events", require("./routes/event"));
+app.use("/api/invite", require("./routes/invite"));
+app.use("/api/teams", require("./routes/team"));
+app.use("/api/admin", require("./routes/admin"));
 
 // Default route
-app.get("/", (req, res) => res.send("CampusChamp API is running "));
+app.get("/", (req, res) => res.send("CampusChamp API is running"));
 
 // 404 Handler
 app.use((req, res) => {
   res.status(404).json({ message: "API route not found" });
 });
 
-// Socket.IO setup
+// Centralized Error Handler (optional but recommended)
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err.stack);
+  res.status(500).json({ message: "Something went wrong!" });
+});
+
+// Socket.IO connection event
 io.on("connection", (socket) => {
   console.log("New client connected:", socket.id);
 
@@ -56,6 +63,6 @@ io.on("connection", (socket) => {
   });
 });
 
-// Start server
+// Start the server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

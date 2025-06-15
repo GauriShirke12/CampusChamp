@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -8,6 +7,7 @@ function TeamBuilder() {
   const [myTeam, setMyTeam] = useState(null);
   const [recommended, setRecommended] = useState([]);
   const [teamName, setTeamName] = useState("");
+
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -101,7 +101,9 @@ function TeamBuilder() {
         <ul className="space-y-2">
           {recommended.map((stu) => (
             <li key={stu._id} className="border p-2 rounded shadow">
-              <div className="font-medium">{stu.name} ({stu.city})</div>
+              <div className="font-medium">
+                {stu.name} ({stu.city})
+              </div>
               <div>Skills: {stu.skills.join(", ")}</div>
               <div>Roles: {stu.rolePreferences.join(", ")}</div>
               <button

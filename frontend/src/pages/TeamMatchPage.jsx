@@ -5,13 +5,13 @@ const TeamMatch = () => {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const token = localStorage.getItem("token");
+
   useEffect(() => {
     const fetchMatches = async () => {
       try {
         const res = await axios.get("/api/student/match-teammates", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
         setMatches(res.data);
       } catch (err) {
@@ -24,9 +24,24 @@ const TeamMatch = () => {
     fetchMatches();
   }, []);
 
+  const sendInvite = async (receiverId) => {
+    try {
+      await axios.post(
+        "/api/invite",
+        { receiverId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Invite sent!");
+    } catch (err) {
+      console.error("Invite error:", err);
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto p-6 mt-10">
-      <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">👥 Recommended Teammates</h2>
+      <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">
+        👥 Recommended Teammates
+      </h2>
 
       {loading ? (
         <p className="text-center">Loading recommendations...</p>
@@ -39,8 +54,12 @@ const TeamMatch = () => {
               key={student._id}
               className="bg-white rounded-xl shadow-lg p-5 border hover:shadow-xl transition"
             >
-              <h3 className="text-xl font-semibold text-blue-600">{student.name}</h3>
-              <p className="text-gray-600 text-sm">{student.collegeName}, {student.city}</p>
+              <h3 className="text-xl font-semibold text-blue-600">
+                {student.name}
+              </h3>
+              <p className="text-gray-600 text-sm">
+                {student.collegeName}, {student.city}
+              </p>
 
               <div className="mt-3">
                 <strong className="text-sm">Skills:</strong>
@@ -70,7 +89,16 @@ const TeamMatch = () => {
                 </div>
               </div>
 
-              <p className="mt-3 text-sm text-gray-500">Match Score: <strong>{student.score}</strong></p>
+              <p className="mt-3 text-sm text-gray-500">
+                Match Score: <strong>{student.score}</strong>
+              </p>
+
+              <button
+                className="mt-4 bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
+                onClick={() => sendInvite(student._id)}
+              >
+                Invite
+              </button>
             </div>
           ))}
         </div>

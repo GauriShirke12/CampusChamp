@@ -1,7 +1,16 @@
+// backend/routes/leaderboard.js
+
 const express = require("express");
 const router = express.Router();
-const { getDSALeaderboard } = require("../controllers/leaderboardController");
+const {
+  getLeaderboard,
+  updateStudentScores,
+} = require("../controllers/leaderboardController");
 
-router.get("/", getDSALeaderboard);
+// GET top students for leaderboard
+router.get("/", getLeaderboard);
+
+// PUT to update a student's DSA score
+router.put("/:id", updateStudentScores);
 
 module.exports = router;

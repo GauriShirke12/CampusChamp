@@ -1,10 +1,8 @@
-// pages/Leaderboard.jsx
-
 import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
-import "./Leaderboard.css"; // Reuse your styles
+import "./Leaderboard.css";
 
 const socket = io("http://localhost:5000");
 
@@ -17,20 +15,13 @@ const getRankIcon = (rank) => {
 
 const Leaderboard = () => {
   const [leaderboard, setLeaderboard] = useState([]);
-  const [error, setError] = useState("");
 
   const fetchLeaderboard = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/leaderboard");
-      if (Array.isArray(res.data)) {
-        setLeaderboard(res.data);
-      } else {
-        console.warn("Expected array but got:", res.data);
-        setLeaderboard([]);
-      }
+      setLeaderboard(res.data);
     } catch (err) {
       console.error("Error fetching leaderboard:", err);
-      setError("Failed to load leaderboard.");
     }
   };
 
@@ -38,11 +29,7 @@ const Leaderboard = () => {
     fetchLeaderboard();
 
     socket.on("leaderboardUpdated", (data) => {
-      if (Array.isArray(data)) {
-        setLeaderboard(data);
-      } else {
-        console.warn("Received invalid leaderboard update:", data);
-      }
+      setLeaderboard(data);
     });
 
     return () => socket.off("leaderboardUpdated");
@@ -51,7 +38,6 @@ const Leaderboard = () => {
   return (
     <div className="leaderboard-container">
       <h2>🏆 Leaderboard</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}
       {leaderboard.length === 0 ? (
         <p>No data available</p>
       ) : (

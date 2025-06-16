@@ -1,0 +1,44 @@
+.leaderboard-container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  background: #f5f7fa;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.leaderboard-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 2rem;
+  color: #333;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1.1rem;
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.leaderboard-table tr:hover {
+  background-color: #eef2f7;
+}
+
+@media (max-width: 600px) {
+  .leaderboard-container {
+    padding: 10px;
+  }
+
+  .leaderboard-table th,
+  .leaderboard-table td {
+    padding: 8px;
+    font-size: 1rem;
+  }
+}

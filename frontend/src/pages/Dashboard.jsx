@@ -1,11 +1,10 @@
-// src/pages/Dashboard.jsx
+
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Trophy, Users, BarChart } from 'lucide-react';
-
+import { Trophy, Users, BarChart, MailCheck } from "lucide-react";
 
 const Dashboard = () => {
   const [invites, setInvites] = useState([]);
@@ -110,13 +109,13 @@ const Dashboard = () => {
             transition={{ delay: 0.1 }}
           >
             <h2 className="text-xl font-semibold mb-4 text-green-400 flex items-center gap-2">
-              <BarChart3 className="w-5 h-5" /> Performance Overview
+              <BarChart className="w-5 h-5" /> Performance Overview
             </h2>
             <ul className="grid grid-cols-2 gap-y-2 text-gray-300 text-sm">
               <li><strong>DSA Score:</strong> {profile.dsaScore || "N/A"}</li>
               <li><strong>DSA Rank:</strong> {profile.dsaRank || "N/A"}</li>
               <li><strong>Quiz Score:</strong> {profile.quizScore || 0}</li>
-              <li><strong>Workshops:</strong> {profile.workshops?.join(", ") || "None"}</li>
+              <li><strong>Workshops:</strong> {profile.workshops?.length || 0}</li>
             </ul>
 
             {/* Progress Bars */}
@@ -140,6 +139,35 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
+
+            {/* Workshops */}
+            <div>
+              <p className="text-sm text-gray-400 mt-4 mb-1">Workshops Attended</p>
+              <div className="flex flex-wrap gap-2">
+                {profile.workshops && profile.workshops.length > 0 ? (
+                  profile.workshops.map((workshop, idx) => (
+                    <span
+                      key={idx}
+                      className="bg-gray-700 text-white px-3 py-1 text-xs rounded-full border border-green-500"
+                    >
+                      {workshop}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-gray-500 text-sm">No workshops yet.</span>
+                )}
+              </div>
+            </div>
+
+            {/* Rank Badge */}
+            {profile.dsaRank && (
+              <div className="mt-6 flex items-center space-x-3">
+                <Trophy className="text-yellow-400 w-6 h-6" />
+                <p className="text-sm text-yellow-300">
+                  You're ranked <strong>#{profile.dsaRank}</strong> among all participants!
+                </p>
+              </div>
+            )}
           </motion.div>
         )}
 
@@ -202,7 +230,6 @@ const Dashboard = () => {
             <p className="text-gray-400">You're not part of any team yet.</p>
           )}
         </motion.div>
-
       </div>
 
       {/* Footer Navigation */}
